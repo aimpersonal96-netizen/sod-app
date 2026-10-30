@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตารางเวรหอนอน หอฟ้าทะลายโจร</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">🌙</span>
+    <div>
+      <h1>ตารางเวรหอนอน</h1>
+      <p>หอฟ้าทะลายโจร · หอเด็กโตชาย · เวร 18:00–07:00 น.</p>
+    </div>
+  </div>
+  <nav id="tabs" class="tabs" role="tablist"></nav>
+</header>
+
+<main id="app"></main>
+
+<dialog id="dlg"></dialog>
+<input type="file" id="importFile" accept="application/json" hidden>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
