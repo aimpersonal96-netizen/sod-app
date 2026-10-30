@@ -1,46 +1,68 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.1.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.2.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1F19">
 <title>ตารางเวรหอนอน หอฟ้าทะลายโจร</title>
 <style>
-/* ธีม: พื้นหลังไล่สีฟ้า-ม่วงอ่อน (ภาพ 2) · กรอบม่วง-ชมพู-ฟ้า (ภาพ 3) · สีครูจากพาเลต (ภาพ 4) */
+/* ธีม 1.2.0: เขียวเข้มแบบแอปการเงิน (Design 1 สว่าง) · หัวการ์ดเขียวเข้มมีลายตาราง · แผ่นเนื้อหาขาวมุมโค้ง · เมนูล่างบนมือถือ
+   สีครูชาย/หญิง (ฟ้า/ชมพู) คงเดิมตามที่ผู้ใช้เลือก */
 :root {
   color-scheme: light;
-  --bg-grad: linear-gradient(135deg, #9AA9EA 0%, #B5C0EF 48%, #D3D9F2 100%);
-  --surface: #F8F9FE; --field: #ffffff;
-  --ink: #1B2250; --muted: #56608A;
-  --line: #BBA7F7;            /* กรอบม่วงลาเวนเดอร์ */
-  --line-soft: #DCD3FA;
-  --grad-border: linear-gradient(135deg, #9B5DE5 0%, #E040C8 55%, #3A8EF0 100%);
-  --brand: #1B2250; --brand-ink: #ffffff; --accent: #4C63E8;
-  --ok: #1B5F21; --ok-bg: #E8F4E8; --warn: #8A5200; --warn-bg: #FFF3E1; --err: #B71D1D; --err-bg: #FFEBEE; --na-bg: #ECEFF9;
+  --hero-grad: linear-gradient(160deg, #0B1F19 0%, #123A2E 45%, #1F6B50 100%);
+  --sheet: #F3F6F4; --surface: #FFFFFF; --field: #ffffff;
+  --ink: #10261F; --muted: #5B7268;
+  --line: #CFDCD5; --line-soft: #E3EAE6;
+  --brand: #0F2A22; --brand-ink: #ffffff; --accent: #2E8B62; --accent-2: #5CC08E; --mint: #9FF0C4;
+  --ok: #1B5F21; --ok-bg: #E8F4E8; --warn: #8A5200; --warn-bg: #FFF3E1; --err: #B71D1D; --err-bg: #FFEBEE; --na-bg: #EEF2F0;
   --m: #0D47A1; --m-bg: #E2F2FC; --f: #C2185B; --f-bg: #FDE5EC;
-  --dg: #502CA8; --dg-bg: #EDE7F6;
-  --radius: 20px;
+  --dg: #2F5D50; --dg-bg: #E2EEE8;
+  --radius: 22px;
+  --shadow: 0 4px 18px rgba(15, 42, 34, .07);
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; background: #C3CBF0; }
-body { margin: 0; min-height: 100vh; background: var(--bg-grad) fixed; color: var(--ink); font-family: "Noto Sans Thai", "Sarabun", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; font-size: 16px; }
+html { -webkit-text-size-adjust: 100%; background: var(--sheet); }
+body { margin: 0; min-height: 100vh; background: var(--sheet); color: var(--ink); font-family: "Noto Sans Thai", "Sarabun", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; font-size: 16px; }
 h1, h2, h3, h4 { margin: 0; line-height: 1.25; }
 button, input, select, textarea { font: inherit; color: inherit; }
 
-.top { background: rgba(255, 255, 255, .38); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1.5px solid var(--line); color: var(--ink); padding: 14px 16px 0; }
-.brand { display: flex; align-items: center; gap: 12px; max-width: 1100px; margin: 0 auto; }
-.brand h1 { font-size: 1.25rem; }
-.brand p { margin: 2px 0 0; font-size: .85rem; color: var(--muted); }
-.logo { font-size: 1.8rem; }
-.tabs { display: flex; gap: 4px; max-width: 1100px; margin: 10px auto 0; overflow-x: auto; scrollbar-width: none; }
-.tabs::-webkit-scrollbar { display: none; }
-.tab { background: transparent; color: var(--ink); border: 0; padding: 10px 16px; cursor: pointer; white-space: nowrap; border-radius: 14px 14px 0 0; font-size: .95rem; opacity: .75; }
-.tab:hover { opacity: 1; }
-.tab[aria-selected="true"] { background: var(--surface); opacity: 1; font-weight: 700; box-shadow: 0 -1.5px 0 var(--line), -1.5px 0 0 var(--line), 1.5px 0 0 var(--line); }
+/* หัวแอป (การ์ดเขียวเข้ม) */
+.top { background: linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px) 0 0 / 22px 22px, var(--hero-grad); color: #fff; padding: max(16px, env(safe-area-inset-top)) 16px 44px; }
+.top-in { max-width: 1100px; margin: 0 auto; }
+.hero-top { display: flex; align-items: center; gap: 12px; }
+.logo { width: 46px; height: 46px; flex: none; display: grid; place-items: center; font-size: 1.4rem; border-radius: 999px; background: rgba(255, 255, 255, .1); border: 2px solid rgba(255, 255, 255, .55); }
+.hello { flex: 1; min-width: 0; }
+.hello h1 { font-size: 1.2rem; }
+.hello p { margin: 1px 0 0; font-size: .75rem; color: #A9C9BA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bell { position: relative; flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .12); color: #fff; cursor: pointer; }
+.bell:hover { background: rgba(255, 255, 255, .2); }
+.bell-n { position: absolute; top: -3px; right: -3px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px; background: #FF6B6B; color: #fff; font-size: .68rem; font-weight: 700; line-height: 19px; text-align: center; box-shadow: 0 0 0 2px #123A2E; }
+.hero { padding-bottom: 2px; }
+.hero-k { font-size: .8rem; color: #A9C9BA; }
+.hero-top + .hero-k { margin-top: 18px; }
+.hero-big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 8px; font-variant-numeric: tabular-nums; }
+.hero-big b { font-size: 2.9rem; font-weight: 700; line-height: 1.05; letter-spacing: -.5px; }
+.hero-big .u { font-size: 1.25rem; color: #DDEFE6; font-weight: 600; }
+.hero-t { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 8px 14px; border-radius: 16px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .12); width: fit-content; max-width: 100%; }
+.hero-name { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.hero-name .dot { width: 10px; height: 10px; border-radius: 999px; flex: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, .35); }
+.hero-none { color: #DDEFE6; font-weight: 600; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: rgba(159, 240, 196, .16); color: var(--mint); }
+.pill-err { background: rgba(255, 138, 138, .2); color: #FFC2C2; } .pill-warn { background: rgba(255, 196, 102, .2); color: #FFDCA3; }
 
-main { max-width: 1100px; margin: 0 auto; padding: 16px; }
-.card, .bar, dialog { border: 1.5px solid transparent; background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--grad-border) border-box; }
-.card { border-radius: var(--radius); padding: 16px; margin-bottom: 16px; box-shadow: 0 6px 24px rgba(60, 60, 140, .10); }
+/* แท็บ: จอใหญ่อยู่ในหัวแอป · มือถือเป็นเมนูล่าง (ดู @media) */
+.tabs { display: flex; gap: 6px; max-width: 1100px; margin: 16px auto 0; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, .08); color: #DDEFE6; border: 1px solid rgba(255, 255, 255, .16); padding: 7px 16px 7px 12px; cursor: pointer; white-space: nowrap; border-radius: 999px; font-size: .92rem; }
+.tab:hover { background: rgba(255, 255, 255, .16); }
+.tab[aria-selected="true"] { background: var(--mint); border-color: var(--mint); color: var(--brand); font-weight: 700; }
+.tab .short { display: none; }
+
+main { position: relative; max-width: 1100px; min-height: 60vh; margin: -28px auto 0; padding: 20px 16px 16px; background: var(--sheet); border-radius: 28px 28px 0 0; }
+.card, .bar, dialog { border: 1px solid var(--line-soft); background: var(--surface); }
+.card { border-radius: var(--radius); padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
 .card h2 { font-size: 1.05rem; margin-bottom: 10px; }
 .muted { color: var(--muted); font-size: .9rem; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
@@ -48,11 +70,57 @@ main { max-width: 1100px; margin: 0 auto; padding: 16px; }
 label.f { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); }
 input[type=date], input[type=text], input[type=number], input[type=password], select, textarea { background: var(--field); border: 1.5px solid var(--line); border-radius: 12px; padding: 8px 12px; min-height: 40px; color: var(--ink); }
 button.btn { background: var(--field); border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 16px; min-height: 40px; cursor: pointer; }
-button.btn:hover { border-color: #E040C8; }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
-button.primary:hover { border-color: #E040C8; }
+button.btn:hover { border-color: var(--accent); }
+button.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: var(--accent); color: #fff; font-weight: 700; }
+button.primary:hover { filter: brightness(1.05); }
 button.danger { color: var(--err); }
 button:focus-visible, input:focus-visible, select:focus-visible, .cell:focus-visible, li[data-action]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* ปุ่มไอคอนกลมของหน้าตารางเวร */
+.quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 520px; margin: 0 auto 10px; }
+.qa { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: 0; padding: 4px 0; cursor: pointer; font-size: .8rem; color: var(--ink); text-align: center; }
+.qi { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--accent); box-shadow: var(--shadow); transition: .15s; }
+.qa:hover .qi { border-color: var(--accent); background: #E8F5EE; }
+.qa-main .qi { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; color: #fff; }
+.hint-line { text-align: center; margin: 0 0 14px; font-size: .8rem; }
+#risk, #issues { scroll-margin-top: 80px; }
+
+/* การ์ดเด่น (เลื่อนซ้าย-ขวาได้) */
+.feat { margin-bottom: 18px; }
+.feat-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 22px; }
+.feat-track::-webkit-scrollbar { display: none; }
+.feat-card { position: relative; flex: 0 0 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 150px; padding: 16px 12px 16px 20px; border-radius: 22px; color: #fff; overflow: hidden;
+  background: radial-gradient(120% 140% at 85% 30%, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, 0) 55%), linear-gradient(120deg, #1F6B50 0%, #3FA37A 55%, #7DD3A8 100%); }
+.feat-warn { background: radial-gradient(120% 140% at 85% 30%, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, 0) 55%), linear-gradient(120deg, #1F5A44 0%, #6E8A3A 55%, #D9B45A 100%); }
+.feat-err { background: radial-gradient(120% 140% at 85% 30%, rgba(255, 255, 255, .2) 0%, rgba(255, 255, 255, 0) 55%), linear-gradient(120deg, #4A1F1F 0%, #9C3A32 55%, #E0846A 100%); }
+.feat-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; z-index: 1; }
+.feat-brand { font-size: .72rem; opacity: .9; font-weight: 600; }
+.feat-txt strong { font-size: 1.3rem; font-weight: 800; line-height: 1.2; text-shadow: 0 1px 8px rgba(0, 0, 0, .12); }
+.feat-sub { font-size: .82rem; opacity: .92; }
+.feat-btn { margin-top: 8px; padding: 4px 14px; border-radius: 999px; border: 1.5px solid rgba(255, 255, 255, .85); background: rgba(255, 255, 255, .08); color: #fff; font-size: .78rem; font-weight: 700; cursor: pointer; }
+.feat-btn:hover { background: rgba(255, 255, 255, .2); }
+.feat-art { flex: none; width: 140px; height: 110px; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .18)); }
+.dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+.dot-btn { width: 8px; height: 8px; padding: 0; border-radius: 999px; border: 0; background: #C9D6CF; cursor: pointer; transition: .2s; }
+.dot-btn[aria-current="true"] { width: 22px; background: var(--accent); }
+
+/* แถวการ์ดเวร 7 คืนข้างหน้า */
+h2.sec { font-size: 1rem; margin: 0 2px 10px; }
+.wk-track { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding: 2px 2px 14px; margin-bottom: 6px; scrollbar-width: thin; }
+.wkc { flex: 0 0 150px; scroll-snap-align: start; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid var(--line-soft); background: var(--surface); box-shadow: var(--shadow); text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.wkc:hover { border-color: var(--accent); }
+.wkc-top { position: relative; display: flex; align-items: center; gap: 10px; height: 76px; padding: 10px 12px; color: #fff; background: linear-gradient(135deg, #2E8B62, #7DD3A8); }
+.wkc-M .wkc-top { background: linear-gradient(135deg, #1E4E8C, #43A5F4 70%, #9AD4FB); }
+.wkc-F .wkc-top { background: linear-gradient(135deg, #A3134D, #ED417A 65%, #F8A9C4); }
+.wkc.off .wkc-top { background: linear-gradient(135deg, #8FA39A, #C9D6CF); }
+.wkc-top b { font-size: 2rem; line-height: 1; }
+.wkc-top span { font-size: .72rem; line-height: 1.3; opacity: .95; }
+.wkc-top em { position: absolute; top: 8px; right: 8px; font-style: normal; font-size: .66rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: rgba(255, 255, 255, .9); color: var(--brand); }
+.wkc-bot { display: flex; flex-direction: column; gap: 4px; padding: 10px 10px 12px; }
+.wkc-tags { display: flex; align-items: center; gap: 6px; font-size: .72rem; }
+.wkc-dg { padding: 0 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.wkc .chip { font-size: .8rem; }
+.wkc.off { cursor: default; opacity: .8; }
 
 .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
 .b-ok { background: var(--ok-bg); color: var(--ok); } .b-warn { background: var(--warn-bg); color: var(--warn); }
@@ -60,9 +128,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, .cell:focus-vis
 .gt { display: inline-block; padding: 0 8px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
 .gt-M { background: var(--m-bg); color: var(--m); } .gt-F { background: var(--f-bg); color: var(--f); }
 
-.bar { position: sticky; top: 8px; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; border-radius: 999px; padding: 6px 12px; margin-bottom: 16px; box-shadow: 0 6px 24px rgba(60, 60, 140, .14); }
+.bar { position: sticky; top: max(8px, env(safe-area-inset-top)); z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: center; border-radius: 999px; padding: 6px 12px; margin: 0 auto 16px; max-width: 520px; box-shadow: 0 6px 22px rgba(15, 42, 34, .12); }
 .bar .month { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 1.1rem; }
-.bar .month button { min-width: 40px; padding: 4px 12px; }
+.bar .month { flex: 1; justify-content: space-between; }
+.bar .month button { min-width: 40px; padding: 4px 12px; color: var(--accent); font-weight: 700; }
 .dirty { color: var(--warn); font-weight: 600; }
 .statusline { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; justify-content: flex-end; margin: -6px 0 12px; font-size: .82rem; }
 button.btn.sm { min-height: 28px; padding: 1px 12px; font-size: .8rem; }
@@ -70,8 +139,10 @@ button.btn.sm { min-height: 28px; padding: 1px 12px; font-size: .8rem; }
 .cmp > div { border: 1.5px solid var(--line-soft); border-radius: 14px; padding: 8px 12px; background: var(--field); }
 .saved { color: var(--ok); font-weight: 600; }
 
-.banner { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding: 10px 16px; border-radius: 16px; margin-bottom: 16px; border: 1.5px solid var(--line); background: var(--surface); }
-.banner.err { background: var(--err-bg); border-color: var(--err); } .banner.warn { background: var(--warn-bg); border-color: var(--warn); } .banner.ok { background: var(--ok-bg); border-color: var(--ok); }
+.banner { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding: 12px 18px; border-radius: 18px; margin-bottom: 16px; border: 1px solid var(--line-soft); background: var(--surface); }
+.banner.err { background: var(--err-bg); border-color: #F2B8B8; } .banner.warn { background: var(--warn-bg); border-color: #F1D3A1; }
+.banner.ok { background: linear-gradient(120deg, #1F6B50 0%, #3FA37A 60%, #7DD3A8 100%); border: 0; color: #fff; padding: 16px 20px; box-shadow: 0 8px 24px rgba(31, 107, 80, .25); }
+.banner.ok .muted { color: rgba(255, 255, 255, .88); }
 
 /* ปฏิทิน */
 .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
@@ -79,7 +150,7 @@ button.btn.sm { min-height: 28px; padding: 1px 12px; font-size: .8rem; }
 .dow.we { color: var(--f); }
 .dow .short { display: none; }
 .cell { position: relative; min-height: 108px; background: var(--field); border: 1.5px solid var(--line); border-radius: 16px; padding: 6px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 3px; font: inherit; color: inherit; }
-.cell:hover { border-color: #E040C8; }
+.cell:hover { border-color: var(--accent); }
 .cell .dn { font-size: .8rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 4px; }
 .cell .dg { font-size: .7rem; background: var(--dg-bg); color: var(--dg); border-radius: 999px; padding: 0 7px; white-space: nowrap; font-weight: 600; }
 .cell.blank { border: 0; background: transparent; cursor: default; }
@@ -111,8 +182,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0; }
 .tablewrap { overflow-x: auto; }
 
-dialog { border-radius: var(--radius); padding: 18px; max-width: 460px; width: calc(100% - 24px); color: var(--ink); }
-dialog::backdrop { background: rgba(27, 34, 80, .45); }
+dialog { border-radius: var(--radius); padding: 18px; max-width: 460px; width: calc(100% - 24px); color: var(--ink); box-shadow: 0 20px 50px rgba(11, 31, 25, .3); }
+dialog::backdrop { background: rgba(11, 31, 25, .5); }
 .pick { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; max-height: 46vh; overflow-y: auto; }
 .pick label { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1.5px solid var(--line); border-radius: 14px; cursor: pointer; flex-wrap: wrap; background: var(--field); }
 .pick label.dim { opacity: .75; }
@@ -125,7 +196,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 8px; }
 .stack { display: flex; flex-direction: column; gap: 8px; }
 
-.toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); background: var(--brand); color: #fff; padding: 10px 18px; border-radius: 999px; opacity: 0; pointer-events: none; transition: .2s; max-width: calc(100% - 24px); z-index: 10; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); background: var(--brand); color: #fff; padding: 10px 18px; border-radius: 999px; opacity: 0; pointer-events: none; transition: .2s; max-width: calc(100% - 24px); z-index: 10; }
 .toast.show { opacity: 1; transform: translateX(-50%); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: .85rem; color: var(--muted); margin: 12px 0 0; align-items: center; }
 .print-title { display: none; }
@@ -133,8 +204,22 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
 .kpis { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 10px 0; }
 .kpis div span { display: block; font-size: .8rem; color: var(--muted); }
 
+/* มือถือ/แท็บเล็ต: แท็บกลายเป็นเมนูล่าง */
+@media (max-width: 820px) {
+  body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; margin: 0; max-width: none; gap: 0; justify-content: space-around; background: var(--surface); border-top: 1px solid var(--line-soft); box-shadow: 0 -6px 20px rgba(15, 42, 34, .08); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); }
+  .tab { flex: 1; flex-direction: column; gap: 2px; padding: 4px 2px; background: none; border: 0; border-radius: 14px; color: var(--muted); font-size: .72rem; }
+  .tab:hover { background: none; }
+  .tab[aria-selected="true"] { background: none; color: var(--accent); }
+  .tab .full { display: none; } .tab .short { display: inline; }
+  .toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
+}
+
 @media (max-width: 640px) {
-  main { padding: 10px 8px; }
+  main { padding: 16px 8px 10px; border-radius: 24px 24px 0 0; }
+  .hero-big b { font-size: 2.5rem; }
+  .feat-art { width: 112px; height: 88px; }
+  .feat-txt strong { font-size: 1.15rem; }
   .card { padding: 12px 8px; }
   .grid { gap: 3px; }
   .dow { font-size: .72rem; padding: 2px 0; }
@@ -155,7 +240,8 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
 
 @media print {
   body { background: #fff; color: #000; }
-  .top, .tabs, .banner, .noprint, .toast, .bar { display: none !important; }
+  .top, .tabs, .banner, .noprint, .toast, .bar, .quick { display: none !important; }
+  main { margin: 0; padding: 0; background: none; border-radius: 0; min-height: 0; }
   .print-title { display: block; text-align: center; margin-bottom: 8px; }
   .card { border: 0; padding: 0; box-shadow: none; background: none; }
   .cell { break-inside: avoid; min-height: 90px; background: #fff !important; box-shadow: none !important; }
@@ -169,13 +255,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
 </head>
 <body>
 <header class="top">
-  <div class="brand">
-    <span class="logo" aria-hidden="true">🌙</span>
-    <div>
-      <h1>ตารางเวรหอนอน</h1>
-      <p>หอฟ้าทะลายโจร · หอเด็กโตชาย · เวร 18:00–07:00 น.</p>
-    </div>
-  </div>
+  <div class="top-in"><div id="hero" class="hero"></div></div>
   <nav id="tabs" class="tabs" role="tablist"></nav>
 </header>
 
@@ -193,7 +273,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.1.1';
+  const VERSION = '1.2.0';
   const SCHEMA = 3;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -284,6 +364,15 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
   }
   const dayMembers = (state, date) => state.staff.filter((s) => state.dayGroups.of[s.name] === dayGroup(state, date)).map((s) => s.name);
   const isDutyNight = (state, d) => d >= state.firstNightDate && !(state.noDuty || []).some((r) => d >= r.from && d <= r.to);
+  // คืนที่มีเวรล่าสุดก่อนคืน d (ข้ามช่วงงดเวร) ใช้ null ถ้าไม่มี
+  function prevDutyNight(state, d) {
+    for (let k = 1; k <= 400; k++) {
+      const p = addDays(d, -k);
+      if (p < state.firstNightDate) return null;
+      if (isDutyNight(state, p)) return p;
+    }
+    return null;
+  }
 
   // เหตุผลที่ครูคนหนึ่งจัดเวรคืนนี้ไม่ได้ (B4 และวันไม่ว่าง) ใช้ null ถ้าจัดได้
   function excludedReason(state, name, d, withUnavailable) {
@@ -311,10 +400,10 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
       if (new Set(names).size !== names.length) add('B1', 'error', d, names, 'มีชื่อซ้ำในคืนเดียวกัน');
       const gs = new Set(names.map((n) => genderOf(state, n)).filter(Boolean));
       if (names.length >= 2 && gs.size > 1) add('B1', 'error', d, names, 'คู่เวรต่างเพศ (ต้องชช/ญญ)');
-      const pg = pairGender(state, names), prev = sched[addDays(d, -1)];
+      const pg = pairGender(state, names), pd = prevDutyNight(state, d), prev = pd && sched[pd];
       if (pg && prev) {
         const pp = pairGender(state, prev);
-        if (pp && pp === pg) add(d.endsWith('-01') ? 'B3' : 'B2', 'error', d, names, 'คืนก่อนหน้าเป็นชุด' + GENDER_LABEL[pg] + 'เหมือนกัน ต้องสลับชุด');
+        if (pp && pp === pg) add(monthOf(pd) !== monthOf(d) ? 'B3' : 'B2', 'error', d, names, 'คืนก่อนหน้าเป็นชุด' + GENDER_LABEL[pg] + 'เหมือนกัน ต้องสลับชุด');
       }
       names.forEach((n) => {
         const grp = state.dayGroups.of[n];
@@ -364,7 +453,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
   function planGenders(state, nights) {
     const out = {};
     if (!nights.length) return out;
-    const keys = Object.keys(state.schedule).filter((k) => (state.schedule[k] || []).length).sort();
+    const keys = Object.keys(state.schedule).filter((k) => (state.schedule[k] || []).length && isDutyNight(state, k)).sort();
     let prev = null;
     for (let i = keys.length - 1; i >= 0; i--) {
       if (keys[i] >= nights[0]) continue;
@@ -388,7 +477,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
     nights.forEach((d) => { if (!state.locked[d]) delete sched[d]; });
     const tmp = Object.assign({}, state, { schedule: sched });
     const gender = planGenders(tmp, nights);
-    const free = nights.filter((d) => !(sched[d] && sched[d].length));
+    const free = nights.filter((d) => !state.locked[d] && !(sched[d] && sched[d].length));
     const pool = {}, pending = [], work = [];
     free.forEach((d) => {
       pool[d] = eligible(tmp, d, gender[d]);
@@ -409,7 +498,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
     nights.forEach((d) => { if (sched[d] && sched[d].length && !free.includes(d)) sched[d].forEach((n) => { if (n in cnt) cnt[n]++; }); });
     const size = { M: state.staff.filter((s) => s.gender === 'M').length, F: state.staff.filter((s) => s.gender === 'F').length };
     const slots = { M: 0, F: 0 };
-    nights.forEach((d) => { if (!pending.includes(d)) slots[gender[d]] += 2; });
+    nights.forEach((d) => { if (!pending.includes(d) && (free.includes(d) || (sched[d] || []).length)) slots[gender[d]] += 2; });
     const remain = work.map((d, i) => ({ M: work.slice(i).filter((x) => gender[x] === 'M').length, F: work.slice(i).filter((x) => gender[x] === 'F').length }));
     remain.push({ M: 0, F: 0 });
 
@@ -611,7 +700,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.1.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.2.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -714,13 +803,96 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
   const csv = (rows) => '﻿' + rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\r\n');
   const monthRange = () => S.monthRange(view.ym);
 
+  // ไอคอนเส้น (SVG ในตัว ไม่โหลดจากภายนอก)
+  const ICON = {
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    chart: '<path d="M5 20v-9M12 20V5M19 20v-6M3 20h18"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5c2 .6 3.2 2.5 3.6 5.5"/>',
+    sliders: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+    sparkle: '<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z"/>',
+    swap: '<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+    printer: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+    more: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M17.5 14v7M14 17.5h7"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'
+  };
+  const icon = (k) => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[k] + '</svg>';
+  const localToday = () => { const d = new Date(); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); };
+  // สถานะของเดือน: จำนวนรายการผิดเงื่อนไข และคืนที่ยังไม่มีครู ("รอหัวหน้าหอ")
+  function monthCounts(issues) {
+    return { errN: issues.filter((i) => i.level === 'error').length,
+      pendN: issues.filter((i) => i.rule === 'P' && i.level === 'warn' && !(state.schedule[i.date] || []).length).length };
+  }
+
   // ---------- เรนเดอร์ ----------
-  const TABS = [['schedule', 'ตารางเวร'], ['summary', 'สรุป/ค่าตอบแทน'], ['people', 'ครู/วันไม่ว่าง'], ['settings', 'ตั้งค่า']];
+  // [id, ชื่อเต็ม, ชื่อสั้นบนเมนูล่างของมือถือ, ไอคอน]
+  const TABS = [['schedule', 'ตารางเวร', 'ตาราง', 'calendar'], ['summary', 'สรุป/ค่าตอบแทน', 'สรุป', 'chart'], ['people', 'ครู/วันไม่ว่าง', 'ครู', 'users'], ['settings', 'ตั้งค่า', 'ตั้งค่า', 'sliders']];
   function render() {
-    $('#tabs').innerHTML = TABS.map(([id, label]) => '<button class="tab" role="tab" data-action="tab" data-tab="' + id + '" aria-selected="' + (view.tab === id) + '">' + label + '</button>').join('');
+    $('#tabs').innerHTML = TABS.map(([id, label, short, ic]) => '<button class="tab" role="tab" data-action="tab" data-tab="' + id + '" aria-selected="' + (view.tab === id) + '">' + icon(ic) + '<span class="full">' + label + '</span><span class="short">' + short + '</span></button>').join('');
+    $('#hero').innerHTML = heroHtml();
     const body = { schedule: renderSchedule, summary: renderSummary, people: renderPeople, settings: renderSettings }[view.tab]();
     const mismatch = S.VERSION !== APP_VERSION ? '<div class="banner err noprint"><strong>ไฟล์ตัวแอปไม่ตรงกัน</strong><span>core.js เวอร์ชัน ' + S.VERSION + ' แต่ app.js เวอร์ชัน ' + APP_VERSION + ' อัปโหลดไฟล์ให้ครบและเป็นชุดเดียวกัน</span></div>' : '';
     $('#app').innerHTML = mismatch + (view.tab === 'settings' ? '' : monthBar()) + saveBar() + body;
+  }
+
+  // หัวแอป: ทักทาย + กระดิ่ง (จำนวนรายการที่ต้องดูของเดือน) · ตัวเลขใหญ่ = คืนที่จัดครบ 2 คน / คืนเวรทั้งเดือน · แถวเวรคืนนี้
+  function heroHtml() {
+    const { start, end } = monthRange(), issues = S.validate(state, start, end), c = monthCounts(issues);
+    const alerts = issues.filter((i) => i.level !== 'info').length + S.capacityWarnings(state, view.ym).length;
+    const st = S.monthStats(state, view.ym), done = st.nights - st.pending.length;
+    const pill = !st.nights ? '' : c.errN ? '<span class="pill pill-err">ผิด ' + c.errN + '</span>'
+      : c.pendN ? '<span class="pill pill-warn">รอ ' + c.pendN + ' คืน</span>' : '<span class="pill">✓ ผ่านครบ</span>';
+    const d = localToday(), ns = state.schedule[d] || [];
+    const who = !S.isDutyNight(state, d) ? '<span class="hero-none">ไม่มีเวร</span>'
+      : ns.length ? ns.map((n) => '<span class="hero-name"><i class="dot" style="background:' + color(n) + '"></i>ครู' + esc(n) + '</span>').join('')
+      : '<span class="hero-none">ยังไม่จัด</span>';
+    return '<div class="hero-top"><span class="logo" aria-hidden="true">🌙</span><div class="hello"><h1>สวัสดี หัวหน้าหอ</h1><p>ตารางเวรหอนอน หอฟ้าทะลายโจร · v' + APP_VERSION + '</p></div>' +
+      '<button class="bell" data-action="goto" data-target="issues" aria-label="รายการที่ต้องดู ' + alerts + ' รายการ">' + icon('bell') + (alerts ? '<span class="bell-n">' + (alerts > 99 ? '99+' : alerts) + '</span>' : '') + '</button></div>' +
+      '<div class="hero-k">จัดเวรแล้ว · ' + ymLabel(view.ym) + '</div>' +
+      '<div class="hero-big">' + (st.nights ? '<b>' + done + '</b><span class="u">/' + st.nights + ' คืน</span>' : '<span class="u">เดือนนี้ไม่มีเวร</span>') + pill + '</div>' +
+      '<div class="hero-t"><span class="hero-k">คืนนี้ ' + S.THAI_DOW[S.dow(d)] + ' ' + be(d) + (state.locked[d] ? ' 🔒' : '') + '</span>' + who + '</div>';
+  }
+
+  // ภาพประกอบการ์ดเด่น (SVG ในตัว): พระจันทร์แก้ว + วงแหวน + แผ่นลอย + ป้ายสถานะ
+  function featArt(kind, uid) {
+    const badge = kind === 'ok' ? '<path d="M95 74l4 4 8-9" stroke="#2E8B62" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+      : '<path d="M101 66v8M101 80v.5" stroke="' + (kind === 'err' ? '#B71D1D' : '#A86A00') + '" stroke-width="3.2" stroke-linecap="round"/>';
+    return '<svg class="feat-art" viewBox="0 0 140 110" aria-hidden="true"><defs>' +
+      '<linearGradient id="fa' + uid + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2FFF8" stop-opacity=".95"/><stop offset="1" stop-color="#8BE3B5" stop-opacity=".45"/></linearGradient>' +
+      '<linearGradient id="fb' + uid + '" x1=".2" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#DFFFEE"/><stop offset=".55" stop-color="#7FD9AB"/><stop offset="1" stop-color="#2E8B62"/></linearGradient></defs>' +
+      '<ellipse cx="70" cy="60" rx="54" ry="17" fill="none" stroke="url(#fa' + uid + ')" stroke-width="8" transform="rotate(-16 70 60)" opacity=".75"/>' +
+      '<path d="M82 14a36 36 0 1 0 24 62a30 30 0 1 1-24-62z" fill="url(#fb' + uid + ')" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>' +
+      '<path d="M18 76a54 17 -16 0 0 106-30" fill="none" stroke="url(#fa' + uid + ')" stroke-width="8" stroke-linecap="round" opacity=".9"/>' +
+      '<rect x="112" y="12" width="15" height="11" rx="2.5" fill="url(#fa' + uid + ')" transform="rotate(22 119 17)"/>' +
+      '<rect x="12" y="18" width="12" height="9" rx="2" fill="url(#fa' + uid + ')" transform="rotate(-18 18 22)"/>' +
+      '<rect x="118" y="84" width="11" height="8" rx="2" fill="url(#fa' + uid + ')" transform="rotate(12 123 88)"/>' +
+      '<circle cx="101" cy="73" r="13" fill="#fff" opacity=".95"/>' + badge + '</svg>';
+  }
+  // การ์ดเด่นแบบเลื่อนได้: สถานะเดือน · ช่วงเสี่ยง · เตือนสำรอง (แสดงเฉพาะใบที่เกี่ยวข้อง)
+  function featHtml(total, errN, pendN, riskN) {
+    const btn = (label, attrs) => '<button class="feat-btn" ' + attrs + '>' + label + '</button>';
+    const slides = [];
+    if (!total) slides.push(['warn', 'เดือนนี้ไม่มีเวร', 'ตรวจ "วันเริ่มเวรแรก" และ "ช่วงงดเวร" ในแท็บตั้งค่า', btn('ไปตั้งค่า', 'data-action="tab" data-tab="settings"')]);
+    else if (errN) slides.push(['err', 'ผิดเงื่อนไข ' + errN + ' รายการ', pendN ? 'และรอหัวหน้าหอ ' + pendN + ' คืน' : 'คืนที่ผิดมีกรอบสีแดงในปฏิทิน', btn('ดูรายการ', 'data-action="goto" data-target="issues"')]);
+    else if (pendN) slides.push(['warn', 'รอหัวหน้าหอ ' + pendN + ' คืน', 'ยังไม่มีครูเวร แตะวันที่ในปฏิทินเพื่อจัดเอง', btn('ดูรายการ', 'data-action="goto" data-target="issues"')]);
+    else slides.push(['ok', 'ผ่านเงื่อนไขพื้นฐานครบ', 'คู่เพศเดียวกัน · สลับชุด · ไม่ชนเวรกลางวัน', btn('พิมพ์ตาราง', 'data-action="print"')]);
+    if (riskN) slides.push(['warn', 'ช่วงเสี่ยง ' + riskN + ' คืน', 'ครูไม่ว่างจนชุดเหลือน้อย ควรดูก่อนสร้างตาราง', btn('ดูช่วงเสี่ยง', 'data-action="goto" data-target="risk"')]);
+    if (unbacked()) slides.push(['ok', 'ยังไม่ได้สำรองข้อมูล', meta.lastBackupAt ? 'สำรองล่าสุด ' + dt(meta.lastBackupAt) : 'ยังไม่เคยสำรอง เก็บไฟล์ไว้ใน iCloud Drive', btn('สำรองตอนนี้', 'data-action="export-json"')]);
+    return '<div class="feat noprint"><div class="feat-track">' + slides.map(([kind, title, sub, b], i) =>
+      '<div class="feat-card feat-' + kind + '"><div class="feat-txt"><span class="feat-brand">🌙 หอฟ้าทะลายโจร</span><strong>' + title + '</strong><span class="feat-sub">' + sub + '</span>' + b + '</div>' + featArt(kind, i) + '</div>').join('') + '</div>' +
+      (slides.length > 1 ? '<div class="dots">' + slides.map((x, i) => '<button class="dot-btn" data-action="feat-dot" data-i="' + i + '" aria-label="การ์ดที่ ' + (i + 1) + '"' + (i ? '' : ' aria-current="true"') + '></button>').join('') + '</div>' : '') + '</div>';
+  }
+  // แถวการ์ดเลื่อนแนวนอน: เวร 7 คืนข้างหน้า (นับจากวันนี้ ไม่ขึ้นกับเดือนที่กำลังดู)
+  function weekHtml() {
+    const t = localToday(), days = S.range(t, S.addDays(t, 6));
+    const genders = S.planGenders(state, days.filter((d) => S.isDutyNight(state, d)));
+    const cards = days.map((d) => {
+      const top = '<span class="wkc-top"><b>' + Number(d.slice(8)) + '</b><span>' + S.THAI_DOW[S.dow(d)] + '<br>' + S.SHORT_MONTH[Number(d.slice(5, 7)) - 1] + '</span>' + (d === t ? '<em>คืนนี้</em>' : '') + '</span>';
+      if (!S.isDutyNight(state, d)) return '<div class="wkc off">' + top + '<span class="wkc-bot"><span class="muted">ไม่มีเวร</span></span></div>';
+      const ns = state.schedule[d] || [], g = ns.length ? (S.pairGender(state, ns) || genders[d]) : genders[d];
+      return '<button class="wkc wkc-' + g + '" data-action="edit" data-date="' + d + '">' + top + '<span class="wkc-bot"><span class="wkc-tags">' + gtag(g) + '<span class="wkc-dg">กลุ่ม ' + S.dayGroup(state, d) + '</span>' + (state.locked[d] ? ' 🔒' : '') + '</span>' +
+        (ns.length ? ns.map((n) => '<span class="chip" style="' + chipStyle(n) + '">ครู' + esc(n) + '</span>').join('') : '<span class="pend">รอหัวหน้าหอ</span>') + '</span></button>';
+    }).join('');
+    return '<div class="noprint"><h2 class="sec">เวร 7 คืนข้างหน้า</h2><div class="wk-track">' + cards + '</div></div>';
   }
 
   function monthBar() {
@@ -752,8 +924,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
     const { start, end } = monthRange();
     const issues = S.validate(state, start, end);
     const by = issuesByDate(issues);
-    const errN = issues.filter((i) => i.level === 'error').length;
-    const pendN = issues.filter((i) => i.rule === 'P' && i.level === 'warn' && !(state.schedule[i.date] || []).length).length;
+    const { errN, pendN } = monthCounts(issues);
     const risk = S.capacityWarnings(state, view.ym);
     const nights = S.range(start, end);
     const genders = S.planGenders(state, nights.filter((d) => S.isDutyNight(state, d)));
@@ -762,7 +933,7 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
     let note = '';
     if (firstDuty) {
       const prev = S.addDays(firstDuty, -1);
-      if (S.isDutyNight(state, prev) && !(state.schedule[prev] || []).length) note = '<p class="muted" style="margin:6px 0 0">⚠ ยังไม่มีตารางเวรของคืนก่อนหน้า (' + be(prev) + ') คืนแรกของเดือนนี้จึงใช้ชุดตามค่าตั้งต้น ควรจัดเดือนก่อนหน้าก่อน เพื่อให้ต่อรอยต่อเดือนถูกต้อง</p>';
+      if (S.isDutyNight(state, prev) && !(state.schedule[prev] || []).length) note = '<p class="muted noprint" style="margin:0 0 12px">⚠ ยังไม่มีตารางเวรของคืนก่อนหน้า (' + be(prev) + ') คืนแรกของเดือนนี้จึงใช้ชุดตามค่าตั้งต้น ควรจัดเดือนก่อนหน้าก่อน เพื่อให้ต่อรอยต่อเดือนถูกต้อง</p>';
     }
 
     const SHORT_DOW = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
@@ -780,26 +951,18 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
       cells += '<button class="cell' + cls + flag + '" data-action="edit" data-date="' + d + '"' + (b ? ' title="' + esc(b.msgs.join('\n')) + '"' : '') + '>' + head + '<span class="body">' + gtag(g) + inner + '</span></button>';
     });
 
-    const riskHtml = risk.length ? '<div class="card noprint"><h2>ช่วงเสี่ยง (ครูไม่ว่างทำให้ชุดเหลือน้อย)</h2><ul class="issues">' +
+    const riskHtml = risk.length ? '<div class="card noprint" id="risk"><h2>ช่วงเสี่ยง (ครูไม่ว่างทำให้ชุดเหลือน้อย)</h2><ul class="issues">' +
       risk.map((r) => '<li class="' + (r.level === 'error' ? 'error' : 'warn') + '" data-action="edit" data-date="' + r.date + '" tabindex="0"><span class="rule">' + (r.level === 'error' ? '✖' : '⚠') + '</span><span><strong>' + be(r.date) + '</strong> · ' + esc(r.msg) + '</span></li>').join('') + '</ul></div>' : '';
     const list = issues.filter((i) => i.level !== 'info');
-    const issuesHtml = list.length ? '<div class="card noprint"><h2>รายการที่ต้องดู (' + list.length + ')</h2><ul class="issues">' +
+    const issuesHtml = list.length ? '<div class="card noprint" id="issues"><h2>รายการที่ต้องดู (' + list.length + ')</h2><ul class="issues">' +
       list.map((i) => '<li class="' + i.level + '" data-action="edit" data-date="' + i.date + '" tabindex="0"><span class="rule">' + i.rule + '</span><span><strong>' + be(i.date) + '</strong> · ' + esc(i.msg) + '</span></li>').join('') + '</ul></div>' : '';
 
     const total = nights.filter((d) => S.isDutyNight(state, d)).length;
-    const banner = !total ? '<div class="banner"><strong>เดือนนี้ไม่มีคืนที่มีเวร</strong><span class="muted">ตรวจ "วันเริ่มเวรแรก" และ "ช่วงงดเวร" ในแท็บตั้งค่า</span></div>'
-      : errN ? '<div class="banner err"><strong>ผิดเงื่อนไข ' + errN + ' รายการ</strong>' + (pendN ? '<span>รอหัวหน้าหอ ' + pendN + ' คืน</span>' : '') + '</div>'
-      : pendN ? '<div class="banner warn"><strong>รอหัวหน้าหอ ' + pendN + ' คืน</strong><span class="muted">ยังไม่มีครูเวร กดวันที่เพื่อจัดเอง</span></div>'
-      : '<div class="banner ok"><strong>ผ่านเงื่อนไขพื้นฐานครบ</strong><span class="muted">คู่เพศเดียวกัน · สลับชุด · ไม่ชนเวรกลางวัน</span></div>';
 
-    return '<div class="card noprint"><div class="row">' +
-      '<button class="btn primary" data-action="generate">สร้างตารางเดือนนี้</button>' +
-      '<button class="btn" data-action="swap-open">⇄ สลับครู</button>' +
-      '<button class="btn" data-action="clear">ล้างที่ไม่ล็อก</button>' +
-      '<button class="btn" data-action="print">พิมพ์ / PDF</button>' +
-      '<button class="btn" data-action="export-csv">ส่งออก CSV</button></div>' +
-      '<p class="muted" style="margin:8px 0 0">แตะที่วันเพื่อแก้ไขหรือล็อกคืน · ตัวสร้างอัตโนมัติจะไม่แตะคืนที่ล็อก และไม่ผ่อนเงื่อนไขเอง คืนที่จัดไม่ได้จะเป็น "รอหัวหน้าหอ"</p>' + note + '</div>' +
-      banner + riskHtml +
+    const qa = (action, ic, label, cls) => '<button class="qa' + (cls ? ' ' + cls : '') + '" data-action="' + action + '"><span class="qi">' + icon(ic) + '</span><span>' + label + '</span></button>';
+    return '<div class="quick noprint">' + qa('generate', 'sparkle', 'สร้างตาราง', 'qa-main') + qa('swap-open', 'swap', 'สลับครู') + qa('print', 'printer', 'พิมพ์ / PDF') + qa('more', 'more', 'เพิ่มเติม') + '</div>' +
+      '<p class="muted noprint hint-line">แตะที่วันเพื่อแก้ไขหรือล็อกคืน · ตัวสร้างอัตโนมัติจะไม่แตะคืนที่ล็อก และไม่ผ่อนเงื่อนไขเอง คืนที่จัดไม่ได้จะเป็น "รอหัวหน้าหอ"</p>' + note +
+      featHtml(total, errN, pendN, risk.length) + weekHtml() + riskHtml +
       '<div class="card"><div class="print-title"><h2>ตารางเวรหอนอน หอฟ้าทะลายโจร · ' + ymLabel(view.ym) + '</h2></div><div class="grid">' + cells + '</div>' +
       '<div class="legend">' + gtag('M') + ' ชุดชาย ' + gtag('F') + ' ชุดหญิง · "กลุ่ม n" = เวรกลางวันของวันนั้น · ' + state.staff.map((s) => '<span class="chip" style="display:inline-block;' + chipStyle(s.name) + '">ครู' + esc(s.name) + '</span>').join(' ') + '</div></div>' +
       issuesHtml;
@@ -1050,6 +1213,15 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
     return S.range(start, end).filter((d) => (state.schedule[d] || []).length).map((d) => '<option value="' + d + '"' + (d === sel ? ' selected' : '') + '>' + Number(d.slice(8)) + ' ' + S.THAI_DOW[S.dow(d)] + ' · ' + state.schedule[d].map((n) => 'ครู' + n).join('/') + '</option>').join('');
   }
   function personOptions(date) { return (state.schedule[date] || []).map((n) => '<option value="' + esc(n) + '">ครู' + esc(n) + '</option>').join(''); }
+  // ปุ่ม "เพิ่มเติม": คำสั่งที่ใช้ไม่บ่อยของหน้าตารางเวร
+  function openMore() {
+    const b = (action, label, cls) => '<button type="button" class="btn' + (cls ? ' ' + cls : '') + '" data-action="' + action + '">' + label + '</button>';
+    dlg().innerHTML = '<form method="dialog" data-form="more"><h3>เพิ่มเติม · ' + ymLabel(view.ym) + '</h3><div class="stack" style="margin-top:12px">' +
+      b('export-csv', 'ส่งออกตารางเดือนนี้ (CSV)') + b('export-json', 'สำรองข้อมูลทั้งหมด') + b('clear', 'ล้างทุกคืนที่ไม่ล็อกในเดือนนี้', 'danger') + '</div>' +
+      '<div class="actions"><button type="button" class="btn" data-action="dlg-cancel">ปิด</button></div></form>';
+    dlg().showModal();
+  }
+
   function openSwap() {
     const { start, end } = monthRange();
     const ds = S.range(start, end).filter((d) => (state.schedule[d] || []).length);
@@ -1079,7 +1251,16 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
     const el = ev.target.closest('[data-action]');
     if (!el) return;
     const a = el.dataset.action, name = el.dataset.name;
+    if (el.closest('form[data-form=more]') && a !== 'dlg-cancel') dlg().close();
     switch (a) {
+      case 'more': openMore(); break;
+      case 'goto': {
+        if (view.tab !== 'schedule') { view.tab = 'schedule'; render(); }
+        const t = document.getElementById(el.dataset.target);
+        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); else toast('ไม่มีรายการที่ต้องดูในเดือนนี้');
+        break;
+      }
+      case 'feat-dot': { const tr = $('.feat-track'); if (tr) tr.scrollTo({ left: Number(el.dataset.i) * tr.clientWidth, behavior: 'smooth' }); break; }
       case 'tab': view.tab = el.dataset.tab; render(); window.scrollTo(0, 0); break;
       case 'month': view.ym = S.addMonth(view.ym, Number(el.dataset.n)); view.seed = 0; render(); break;
       case 'save': {
@@ -1244,7 +1425,13 @@ dialog::backdrop { background: rgba(27, 34, 80, .45); }
   });
 
   dlg().addEventListener('click', (ev) => { if (ev.target === ev.currentTarget) ev.currentTarget.close(); });
-  { const bp = document.querySelector('.brand p'); if (bp) bp.textContent += ' · v' + APP_VERSION; }
+  // จุดบอกตำแหน่งของการ์ดเด่นตามการเลื่อน
+  document.addEventListener('scroll', (ev) => {
+    const tr = ev.target;
+    if (!tr.classList || !tr.classList.contains('feat-track')) return;
+    const i = Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth));
+    tr.parentElement.querySelectorAll('.dot-btn').forEach((b, k) => { if (k === i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+  }, true);
   render();
   if (syncReady()) ghCheck(true);
 })();
