@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.2.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.2.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -273,7 +273,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
   const SCHEMA = 3;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -364,12 +364,13 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   }
   const dayMembers = (state, date) => state.staff.filter((s) => state.dayGroups.of[s.name] === dayGroup(state, date)).map((s) => s.name);
   const isDutyNight = (state, d) => d >= state.firstNightDate && !(state.noDuty || []).some((r) => d >= r.from && d <= r.to);
-  // คืนที่มีเวรล่าสุดก่อนคืน d (ข้ามช่วงงดเวร) ใช้ null ถ้าไม่มี
+  // คืนที่มีเวรล่าสุดก่อนคืน d (กระโดดข้ามช่วงงดเวรทั้งช่วง ไม่จำกัดความยาว) ใช้ null ถ้าไม่มี
   function prevDutyNight(state, d) {
-    for (let k = 1; k <= 400; k++) {
-      const p = addDays(d, -k);
-      if (p < state.firstNightDate) return null;
-      if (isDutyNight(state, p)) return p;
+    let p = addDays(d, -1);
+    while (p >= state.firstNightDate) {
+      const r = (state.noDuty || []).find((x) => p >= x.from && p <= x.to);
+      if (!r) return p;
+      p = addDays(r.from, -1);
     }
     return null;
   }
@@ -700,7 +701,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.2.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.2.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
