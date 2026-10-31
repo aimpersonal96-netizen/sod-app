@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.7.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.7.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -27,8 +27,10 @@
   --shadow: 0 4px 18px rgba(15, 42, 34, .07);
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; background: var(--sheet); }
-body { margin: 0; min-height: 100vh; background: var(--sheet); color: var(--ink); font-family: "Noto Sans Thai", "Sarabun", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; font-size: 16px; }
+/* iPhone (iOS 26+) ระบายสีแถบเวลาด้านบนตาม background-color ของหน้า จึงตั้งสีพื้นหลังเป็นดำ (ต่อกับหัวแอปที่ไล่จากดำ)
+   แล้ววางพื้นเทาอ่อนเป็นภาพพื้นหลังตั้งแต่ 160px ลงไป (อยู่หลังหัวแอปเสมอ หน้าตาเหมือนเดิม) · html ดำ = ดึงหน้าเกินขอบบนแล้วเห็นดำ */
+html { -webkit-text-size-adjust: 100%; background: #000; }
+body { margin: 0; min-height: 100vh; background: #000 linear-gradient(var(--sheet), var(--sheet)) 0 160px / 100% 100% no-repeat; color: var(--ink); font-family: "Noto Sans Thai", "Sarabun", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; font-size: 16px; }
 h1, h2, h3, h4 { margin: 0; line-height: 1.25; }
 button, input, select, textarea { font: inherit; color: inherit; }
 
@@ -311,6 +313,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 
 @media print {
   @page { size: A4; margin: 14mm 12mm; }
+  html { background: #fff; }
   body { background: #fff; color: #000; padding: 0 !important; }
   body.print-receipt #app > * { display: none !important; }
   body.print-receipt #app > .receipt { display: block !important; }
@@ -426,7 +429,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.7.0';
+  const VERSION = '1.7.1';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -1237,7 +1240,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.7.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.7.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
