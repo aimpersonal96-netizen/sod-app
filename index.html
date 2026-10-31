@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.4.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.4.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -342,7 +342,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.4.0';
+  const VERSION = '1.4.1';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -486,12 +486,15 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   const isHolidayNight = (state, d) => dow(d) === 6 || dow(d) === 0 || !!holidayName(state, d);
   const onTravel = (state, name, d) => ((state.travel || {})[name] || []).includes(d);
   // คืนที่มีเวรล่าสุดก่อนคืน d (กระโดดข้ามช่วงงดเวรทั้งช่วง ไม่จำกัดความยาว) ใช้ null ถ้าไม่มี
+  // ข้ามทั้งช่วงงดเวร (noDuty) และช่วงปิดเทอม (ระหว่างเทอม) ไปหาคืนเวรจริงล่าสุด
   function prevDutyNight(state, d) {
     let p = addDays(d, -1);
     while (p >= state.firstNightDate) {
       const r = (state.noDuty || []).find((x) => p >= x.from && p <= x.to);
-      if (!r) return p;
-      p = addDays(r.from, -1);
+      if (r) { p = addDays(r.from, -1); continue; }
+      if (isDutyNight(state, p)) return p;
+      const before = sortedTerms(state).filter((t) => t.to < p).pop(); // ปิดเทอม: กระโดดไปคืนสุดท้ายของเทอมก่อนหน้า
+      p = before ? before.to : addDays(p, -1);
     }
     return null;
   }
@@ -596,10 +599,24 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
     return out;
   }
 
+  // สร้างตารางของเดือน: ถ้าเดือนนั้นมีคืนของหลายเทอม จัดทีละช่วงเทอม (ยอดสะสมเริ่มใหม่ตามเทอมของคืนนั้น)
   function generate(state, ym, opts) {
-    opts = opts || {};
     const { start, end } = monthRange(ym);
-    const nights = range(start, end).filter((d) => isDutyNight(state, d));
+    const all = range(start, end).filter((d) => isDutyNight(state, d)), segs = [];
+    all.forEach((d) => { const t = termOf(state, d), last = segs[segs.length - 1]; if (last && last.term === t) last.nights.push(d); else segs.push({ term: t, nights: [d] }); });
+    if (segs.length <= 1) return generateNights(state, all, segs.length ? segs[0].term : null, opts);
+    let st = state; const out = { schedule: state.schedule, pending: [], gender: {}, balanced: true };
+    segs.forEach((sg) => {
+      const r = generateNights(st, sg.nights, sg.term, opts);
+      st = Object.assign({}, st, { schedule: r.schedule });
+      out.schedule = r.schedule; out.pending = out.pending.concat(r.pending); Object.assign(out.gender, r.gender); out.balanced = out.balanced && r.balanced;
+    });
+    return out;
+  }
+
+  // จัดคืนเวรชุดหนึ่ง (ในเทอมเดียวกัน) ยอดสะสมนับจากคืนเวรแรกของเทอม term ถึงก่อนคืนแรกของชุดนี้
+  function generateNights(state, nights, term, opts) {
+    opts = opts || {};
     const sched = Object.assign({}, state.schedule);
     const keep = (d) => state.locked[d] || (state.single || {})[d]; // คืนที่ล็อก และเวรเดี่ยว ตัวสร้างไม่แตะ
     nights.forEach((d) => { if (!keep(d)) delete sched[d]; });
@@ -625,8 +642,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
     // ความสมดุล: นับสะสมตั้งแต่ต้นเทอม (เดือนก่อนๆ ในเทอมเดียวกัน) ถ้าไม่มีเทอมนับภายในเดือน · เวรวันหยุดนับแยก
     const names = state.staff.map((s) => s.name);
     const cnt = {}, hol = {}; names.forEach((n) => { cnt[n] = 0; hol[n] = 0; });
-    const term = termOfMonth(state, ym);
-    const prior = term ? range(term.from, addDays(start, -1)).filter((d) => isDutyNight(state, d)) : [];
+    const prior = term && nights.length ? range(term.from, addDays(nights[0], -1)).filter((d) => isDutyNight(state, d)) : [];
     const tally = (d, list) => (list || []).forEach((n) => { if (n in cnt) { cnt[n]++; if (isHolidayNight(state, d)) hol[n]++; } });
     prior.forEach((d) => tally(d, state.schedule[d]));
     nights.forEach((d) => { if (sched[d] && sched[d].length && !free.includes(d)) tally(d, sched[d]); });
@@ -756,13 +772,15 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
     return { ok: true, state: st };
   }
   // สรุปความเป็นธรรม: เดือนนี้ และสะสมตั้งแต่ต้นเทอมถึงสิ้นเดือนนี้ (ไม่มีเทอม = เฉพาะเดือน) นับจากตารางจริง (เวรเดี่ยวนับ 1 คืน)
+  // ถ้าเดือนนั้นมีหลายเทอม ยอดสะสมใช้เทอมของคืนเวรสุดท้ายของเดือน (เทอมล่าสุด) ส่วนคอลัมน์ "เดือนนี้" นับทุกคืนในเดือน
   function fairness(state, ym) {
-    const { start, end } = monthRange(ym), term = termOfMonth(state, ym);
+    const { start, end } = monthRange(ym), monthNights = range(start, end).filter((d) => isDutyNight(state, d));
+    const term = monthNights.length ? termOf(state, monthNights[monthNights.length - 1]) : termOfMonth(state, ym);
     const from = term ? term.from : start, to = term && term.to < end ? term.to : end;
     const rows = {}; state.staff.forEach((s) => { rows[s.name] = { name: s.name, gender: s.gender, active: s.active !== false, month: 0, monthHol: 0, cum: 0, cumHol: 0, travel: 0 }; });
-    range(from, to).filter((d) => isDutyNight(state, d)).forEach((d) => {
-      const h = isHolidayNight(state, d), inMonth = d >= start;
-      (state.schedule[d] || []).forEach((n) => { const r = rows[n]; if (!r) return; r.cum++; if (h) r.cumHol++; if (inMonth) { r.month++; if (h) r.monthHol++; } if (onTravel(state, n, d)) r.travel++; });
+    range(from < start ? from : start, end).filter((d) => isDutyNight(state, d)).forEach((d) => {
+      const h = isHolidayNight(state, d), inMonth = d >= start, inCum = d >= from && d <= to;
+      (state.schedule[d] || []).forEach((n) => { const r = rows[n]; if (!r) return; if (inCum) { r.cum++; if (h) r.cumHol++; } if (inMonth) { r.month++; if (h) r.monthHol++; if (onTravel(state, n, d)) r.travel++; } });
     });
     const list = state.staff.map((s) => rows[s.name]).filter((r) => r.active || r.cum);
     const spread = (g, k) => { const v = list.filter((r) => r.gender === g && r.active).map((r) => r[k]); return v.length ? Math.max(...v) - Math.min(...v) : 0; };
@@ -922,7 +940,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.4.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.4.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
