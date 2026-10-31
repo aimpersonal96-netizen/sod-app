@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.4.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.5.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -93,6 +93,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, .cell:focus-vis
 .tagx.hol { background: var(--f-bg); color: var(--f); }
 .cell.hol .num { color: var(--f); font-weight: 700; }
 /* วันไม่ว่าง / คืนกลับจากราชการ (แท็บครู) */
+/* ส่งตารางไป LINE */
+dialog { max-height: 92vh; overflow-y: auto; }
+.share-prev { display: block; width: 100%; height: auto; margin: 10px 0 12px; border-radius: 12px; border: 1px solid var(--line-soft); }
+#shareNote { width: 100%; resize: vertical; line-height: 1.5; font-size: .9rem; }
+.share-text { margin-top: 10px; }
+.share-text summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
+.share-text pre { white-space: pre-wrap; font: inherit; font-size: .82rem; max-height: 220px; overflow: auto; background: var(--sheet); padding: 10px 12px; border-radius: 12px; margin: 8px 0 0; -webkit-user-select: text; user-select: text; }
 h4.dhead { font-size: .82rem; color: var(--muted); margin: 8px 0 0; }
 .tag.tag-travel { background: #FFF1D6; color: #8A5200; }
 .tag.tag-travel button { color: #8A5200; }
@@ -342,7 +349,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.4.1';
+  const VERSION = '1.5.0';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -788,6 +795,29 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
       spread: { M: { cum: spread('M', 'cum'), cumHol: spread('M', 'cumHol') }, F: { cum: spread('F', 'cum'), cumHol: spread('F', 'cumHol') } } };
   }
 
+  // ข้อความตารางเวรสำหรับส่ง LINE (ข้อความล้วน วางในกลุ่มได้ทันที) opts.fair = แนบสรุปความเป็นธรรม
+  function lineMessage(state, ym, opts) {
+    opts = opts || {};
+    const { start, end } = monthRange(ym), [y, m] = ym.split('-').map(Number);
+    const SD = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+    const out = ['📅 ตารางเวรหอนอน ' + (state.dormName || ''), 'ประจำเดือน' + THAI_MONTH[m - 1] + ' ' + (y + 543) + ' · เวร 18:00–07:00 น.', ''];
+    range(start, end).forEach((d) => {
+      if (!isDutyNight(state, d)) return;
+      const ns = state.schedule[d] || [];
+      const tags = [holidayName(state, d) ? 'หยุด' : '', isSingle(state, d) ? 'เดี่ยว' : ''].filter(Boolean);
+      out.push(SD[dow(d)] + ' ' + Number(d.slice(8)) + ' · ' + (ns.length ? ns.map((n) => 'ครู' + n).join(' / ') : 'รอหัวหน้าหอ') + (tags.length ? ' (' + tags.join(', ') + ')' : ''));
+      if (dow(d) === 6) out.push('');
+    });
+    if (opts.fair) {
+      const f = fairness(state, ym);
+      out.push('', '📒 สมุดสะสมเวร' + (f.term ? ' (ทั้งเทอม ' + f.term + ')' : ''));
+      f.rows.forEach((r) => out.push('ครู' + r.name + ' เดือนนี้ ' + r.month + ' คืน (วันหยุด ' + r.monthHol + ')' + (f.term ? ' · สะสม ' + r.cum + ' (วันหยุด ' + r.cumHol + ')' : '')));
+      out.push('คืนวันหยุด = คืนเสาร์ อาทิตย์ และนักขัตฤกษ์');
+    }
+    out.push('', 'แลกเวรหรือมีธุระ แจ้งหัวหน้าหอ เพื่อบันทึกและคิดค่าตอบแทนตามจริง');
+    return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   // คืนที่ตารางเปลี่ยน (เทียบก่อน-หลัง) ใช้บันทึกการเปลี่ยนเวรหลังประกาศ: [{date, from, to}] เรียงตามวันที่
   function scheduleDiff(before, after, dates) {
     const keys = dates || Array.from(new Set(Object.keys(before || {}).concat(Object.keys(after || {})))).sort();
@@ -930,7 +960,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 
   return { VERSION, SCHEMA, isSupportedVersion, migrate, THAI_DOW, THAI_MONTH, SHORT_MONTH, GENDER_LABEL, GENDER_SHORT,
     parse, fmt, addDays, diffDays, dow, range, isIso, monthOf, monthRange, addMonth,
-    defaultState, activeStaff, termOf, termOfMonth, holidayName, isHolidayNight, onTravel, fairness, FIXED_HOLIDAYS, isSingle, nightGender, scheduleDiff, renameStaff, staffUsage, formalName, bahtText, genderOf, pairGender, dayGroup, dayMembers, isDutyNight, excludedReason, eligible,
+    defaultState, activeStaff, lineMessage, termOf, termOfMonth, holidayName, isHolidayNight, onTravel, fairness, FIXED_HOLIDAYS, isSingle, nightGender, scheduleDiff, renameStaff, staffUsage, formalName, bahtText, genderOf, pairGender, dayGroup, dayMembers, isDutyNight, excludedReason, eligible,
     validate, monthStats, payroll, planGenders, generate, capacityWarnings, explainNight, swapTeachers,
     summarizeState, backupFileName, compareBackup, hashString, pushHistory,
     b64encodeUtf8, b64decodeUtf8, GhError, ghValidate, ghGet, ghPut };
@@ -940,7 +970,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.4.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.5.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -1071,6 +1101,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
     swap: '<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
     printer: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
     more: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M17.5 14v7M14 17.5h7"/>',
+    send: '<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>',
     bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'
   };
   const icon = (k) => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[k] + '</svg>';
@@ -1230,7 +1261,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
     const status = mi.closedAt ? '<div class="mstat noprint closed"><span>🔒 <b>ปิดเดือนแล้ว</b> ' + dt(mi.closedAt) + ' · แก้ตารางไม่ได้</span><button class="btn sm" data-action="tab" data-tab="summary">ดูที่แท็บสรุป</button></div>'
       : mi.announcedAt ? '<div class="mstat noprint on"><span>📣 <b>ประกาศแล้ว</b> ' + dt(mi.announcedAt) + ' · เปลี่ยนหลังประกาศ ' + nChg + ' ครั้ง (ระบบบันทึกให้)</span><button class="btn sm" data-action="tab" data-tab="summary">ดูบันทึก</button></div>'
       : '<div class="mstat noprint"><span>📝 <b>ร่าง</b> · ยังไม่ประกาศ</span><button class="btn sm primary" data-action="announce">ประกาศตาราง</button></div>';
-    return '<div class="quick noprint">' + qa('generate', 'sparkle', 'สร้างตาราง', 'qa-main') + qa('swap-open', 'swap', 'สลับครู') + qa('print', 'printer', 'พิมพ์ / PDF') + qa('more', 'more', 'เพิ่มเติม') + '</div>' + status +
+    return '<div class="quick noprint">' + qa('generate', 'sparkle', 'สร้างตาราง', 'qa-main') + qa('swap-open', 'swap', 'สลับครู') + qa('share', 'send', 'ส่ง LINE') + qa('more', 'more', 'เพิ่มเติม') + '</div>' + status +
       '<p class="muted noprint hint-line">แตะที่วันเพื่อแก้ไขหรือล็อกคืน · ตัวสร้างอัตโนมัติจะไม่แตะคืนที่ล็อก และไม่ผ่อนเงื่อนไขเอง คืนที่จัดไม่ได้จะเป็น "รอหัวหน้าหอ"</p>' + note +
       featHtml(total, errN, pendN, risk.length) + weekHtml() + riskHtml +
       '<div class="card"><div class="print-title"><h2>ตารางเวรหอนอน หอฟ้าทะลายโจร · ' + ymLabel(view.ym) + '</h2></div><div class="grid">' + cells + '</div>' +
@@ -1239,7 +1270,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   }
 
   // วันที่ (เลขวัน) ที่ครูขึ้นเวรในเดือนที่กำลังดู
-  // สรุปความเป็นธรรม: แสดงที่แท็บสรุป และพิมพ์ติดไปกับตารางเวร
+  // สมุดสะสมเวร (เดิมชื่อ สรุปความเป็นธรรม): แสดงที่แท็บสรุป และพิมพ์ติดไปกับตารางเวร
   function fairnessCard() {
     const f = S.fairness(state, view.ym);
     if (!f.rows.length) return '';
@@ -1248,7 +1279,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
       '<td class="num">' + r.month + '</td><td class="num">' + r.monthHol + '</td><td class="num"><b>' + r.cum + '</b></td><td class="num"><b>' + r.cumHol + '</b></td>' +
       (anyTravel ? '<td class="num">' + (r.travel || '–') + '</td>' : '') + '</tr>').join('');
     const sp = (g) => S.GENDER_LABEL[g] + ': เวรรวมต่างกัน ' + f.spread[g].cum + ' · เวรวันหยุดต่างกัน ' + f.spread[g].cumHol;
-    return '<div class="card fair"><h2>สรุปความเป็นธรรม' + (f.term ? ' · เทอม ' + esc(f.term) : '') + '</h2>' +
+    return '<div class="card fair"><h2>สมุดสะสมเวร' + (f.term ? ' · เทอม ' + esc(f.term) : '') + '</h2>' +
       '<p class="muted">' + (f.term ? 'สะสมตั้งแต่ ' + be(f.from) + ' ถึง ' + be(f.to) : 'ยังไม่ได้ตั้งเทอม จึงนับเฉพาะเดือน' + ymLabel(view.ym)) + ' · นับจากตารางจริง (หลังเปลี่ยนเวร) · คืนวันหยุด = คืนวันเสาร์ คืนวันอาทิตย์ และคืนวันหยุดนักขัตฤกษ์</p>' +
       '<div class="tablewrap"><table><thead><tr><th>ครู</th><th class="num">เดือนนี้</th><th class="num">วันหยุด (เดือนนี้)</th><th class="num">สะสม' + (f.term ? 'ทั้งเทอม' : '') + '</th><th class="num">วันหยุดสะสม</th>' +
       (anyTravel ? '<th class="num">จัดในคืนกลับราชการ</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
@@ -1609,11 +1640,116 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
     return S.range(start, end).filter((d) => (state.schedule[d] || []).length).map((d) => '<option value="' + d + '"' + (d === sel ? ' selected' : '') + '>' + Number(d.slice(8)) + ' ' + S.THAI_DOW[S.dow(d)] + ' · ' + state.schedule[d].map((n) => 'ครู' + n).join('/') + '</option>').join('');
   }
   function personOptions(date) { return (state.schedule[date] || []).map((n) => '<option value="' + esc(n) + '">ครู' + esc(n) + '</option>').join(''); }
+  // ---------- ส่งตารางไป LINE: ภาพวาดบน canvas ในเครื่อง (ไม่ส่งข้อมูลออก) + ข้อความ ----------
+  const FONT = '"Noto Sans Thai", "Sarabun", "Thonburi", system-ui, -apple-system, sans-serif';
+  function rr(x, px, py, w, h, r) { x.beginPath(); x.moveTo(px + r, py); x.arcTo(px + w, py, px + w, py + h, r); x.arcTo(px + w, py + h, px, py + h, r); x.arcTo(px, py + h, px, py, r); x.arcTo(px, py, px + w, py, r); x.closePath(); }
+  function fitFont(x, text, weight, size, maxW) { let s = size; x.font = weight + ' ' + s + 'px ' + FONT; while (s > 12 && x.measureText(text).width > maxW) { s--; x.font = weight + ' ' + s + 'px ' + FONT; } }
+  function pill(x, text, px, py, h, bg, fg, weight, size, align) {
+    x.font = (weight || 700) + ' ' + (size || 18) + 'px ' + FONT;
+    const w = x.measureText(text).width + h * 0.9, left = align === 'right' ? px - w : px;
+    rr(x, left, py, w, h, h / 2); x.fillStyle = bg; x.fill();
+    x.fillStyle = fg; x.textAlign = 'center'; x.fillText(text, left + w / 2, py + h / 2 + 1);
+    return w;
+  }
+  function posterCanvas(withFair) {
+    const W = 1600, P = 28, { start, end } = monthRange(), nights = S.range(start, end), off = S.dow(start);
+    const rows = Math.ceil((off + nights.length) / 7), cw = (W - P * 2) / 7, ch = 150, headH = 150, dowH = 46;
+    const f = S.fairness(state, view.ym), showFair = withFair && f.rows.length;
+    const fairH = showFair ? 64 + Math.ceil(f.rows.length / 4) * 78 : 0, legendH = 64, footH = 50;
+    const H = headH + dowH + rows * ch + legendH + fairH + footH;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d'); x.textBaseline = 'middle';
+    x.fillStyle = '#F3F6F4'; x.fillRect(0, 0, W, H);
+    // หัวภาพ: การ์ดเขียวเข้มมีลายตาราง
+    const g = x.createLinearGradient(0, 0, W, headH); g.addColorStop(0, '#0B1F19'); g.addColorStop(0.55, '#123A2E'); g.addColorStop(1, '#1F6B50');
+    x.fillStyle = g; x.fillRect(0, 0, W, headH);
+    x.strokeStyle = 'rgba(255,255,255,.05)'; x.lineWidth = 1;
+    for (let i = 0; i < W; i += 22) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, headH); x.stroke(); }
+    for (let j = 0; j < headH; j += 22) { x.beginPath(); x.moveTo(0, j); x.lineTo(W, j); x.stroke(); }
+    x.textAlign = 'left'; x.fillStyle = '#fff'; x.font = '700 52px ' + FONT; x.fillText('ตารางเวรหอนอน ประจำเดือน' + ymLabel(view.ym), P + 8, 62);
+    x.fillStyle = '#A9C9BA'; x.font = '400 26px ' + FONT; x.fillText((state.dormName || '') + ' · เวร 18:00–07:00 น.' + (f.term ? ' · เทอม ' + f.term : ''), P + 10, 114);
+    // หัวคอลัมน์วัน
+    let y0 = headH;
+    S.THAI_DOW.forEach((n, i) => { x.textAlign = 'center'; x.font = '700 24px ' + FONT; x.fillStyle = i === 0 || i === 6 ? '#C2185B' : '#10261F'; x.fillText(n, P + cw * i + cw / 2, y0 + dowH / 2 + 2); });
+    y0 += dowH;
+    const genders = S.planGenders(state, nights.filter((d) => S.isDutyNight(state, d)));
+    for (let k = 0; k < rows * 7; k++) {
+      const i = k - off; if (i < 0 || i >= nights.length) continue;
+      const d = nights[i], col = k % 7, cx = P + col * cw + 4, cy = y0 + Math.floor(k / 7) * ch + 4, w = cw - 8, h = ch - 8;
+      const duty = S.isDutyNight(state, d), hn = S.holidayName(state, d);
+      rr(x, cx, cy, w, h, 16); x.fillStyle = duty ? '#fff' : 'rgba(255,255,255,.5)'; x.fill();
+      x.strokeStyle = hn ? '#F48FB1' : '#D7E2DC'; x.lineWidth = hn ? 2.5 : 1.5; x.stroke();
+      x.textAlign = 'left'; x.font = '700 30px ' + FONT; x.fillStyle = col === 0 || col === 6 || hn ? '#C2185B' : '#10261F'; x.fillText(String(Number(d.slice(8))), cx + 12, cy + 26);
+      pill(x, 'กลุ่ม ' + dgText(d), cx + w - 10, cy + 12, 28, '#E2EEE8', '#2F5D50', 600, 18, 'right');
+      if (!duty) { x.textAlign = 'left'; x.font = '400 20px ' + FONT; x.fillStyle = '#8FA39A'; x.fillText('ไม่มีเวร', cx + 12, cy + 74); continue; }
+      const ns = state.schedule[d] || [];
+      let tx = cx + 12;
+      if (hn) tx += pill(x, 'หยุด', tx, cy + 46, 24, '#FDE5EC', '#C2185B', 700, 16) + 6;
+      if (S.isSingle(state, d)) pill(x, 'เดี่ยว', tx, cy + 46, 24, '#FFF1D6', '#8A5200', 700, 16);
+      if (!ns.length) { x.textAlign = 'left'; x.font = '700 20px ' + FONT; x.fillStyle = '#8A5200'; x.fillText('รอหัวหน้าหอ', cx + 12, cy + 100); continue; }
+      ns.slice(0, 2).forEach((n, j) => {
+        const py = cy + 78 + j * 30, pw = w - 20, bg = color(n);
+        rr(x, cx + 10, py, pw, 27, 13.5); x.fillStyle = bg; x.fill();
+        x.fillStyle = textOn(bg); x.textAlign = 'left'; fitFont(x, 'ครู' + n, 700, 20, pw - 18); x.fillText('ครู' + n, cx + 19, py + 14);
+      });
+    }
+    // คำอธิบายสี
+    let y = y0 + rows * ch + 12, lx = P + 6;
+    S.activeStaff(state).forEach((s) => { lx += pill(x, 'ครู' + s.name, lx, y, 34, color(s.name), textOn(color(s.name)), 700, 20) + 8; });
+    x.textAlign = 'right'; x.font = '400 18px ' + FONT; x.fillStyle = '#5B7268'; x.fillText('กลุ่ม = เวรกลางวันของวันนั้น', W - P, y + 17);
+    y += legendH;
+    // สมุดสะสมเวร
+    if (showFair) {
+      x.textAlign = 'left'; x.font = '700 28px ' + FONT; x.fillStyle = '#10261F'; x.fillText('สมุดสะสมเวร' + (f.term ? ' · ทั้งเทอม ' + f.term : ' · เดือนนี้'), P + 6, y + 20);
+      x.textAlign = 'right'; x.font = '400 18px ' + FONT; x.fillStyle = '#5B7268'; x.fillText('คืนวันหยุด = คืนเสาร์ อาทิตย์ และนักขัตฤกษ์ · นับจากตารางจริง', W - P, y + 20);
+      const bw = (W - P * 2 - 30) / 4;
+      f.rows.forEach((r, i) => {
+        const bx = P + (i % 4) * (bw + 10), by = y + 46 + Math.floor(i / 4) * 78;
+        rr(x, bx, by, bw, 68, 14); x.fillStyle = '#fff'; x.fill(); x.strokeStyle = '#D7E2DC'; x.lineWidth = 1.5; x.stroke();
+        const tw = pill(x, 'ครู' + r.name, bx + 12, by + 17, 34, color(r.name), textOn(color(r.name)), 700, 20);
+        x.textAlign = 'left'; x.font = '600 19px ' + FONT; x.fillStyle = '#10261F'; x.fillText('เดือนนี้ ' + r.month + ' คืน (หยุด ' + r.monthHol + ')', bx + tw + 24, by + 23);
+        if (f.term) { x.font = '400 18px ' + FONT; x.fillStyle = '#5B7268'; x.fillText('สะสม ' + r.cum + ' คืน (หยุด ' + r.cumHol + ')', bx + tw + 24, by + 47); }
+      });
+      y += fairH;
+    }
+    x.textAlign = 'left'; x.font = '400 18px ' + FONT; x.fillStyle = '#5B7268'; x.fillText('แลกเวรหรือมีธุระ แจ้งหัวหน้าหอ เพื่อบันทึกและคิดค่าตอบแทนตามจริง', P + 6, y + 18);
+    x.textAlign = 'right'; x.fillText('ระบบจัดเวรหอนอน v' + APP_VERSION + ' · ทำเมื่อ ' + be(localToday()), W - P, y + 18);
+    return c;
+  }
+  let shareCache = null;
+  // ข้อความแนบกับรูป: บรรทัดแรกระบุเดือนให้อัตโนมัติ ส่วนเนื้อความแก้ได้และจำไว้ในเครื่องนี้ (meta.shareNote)
+  const DEFAULT_NOTE = 'ตั้งแต่เดือนนี้ ตารางเวรจัดด้วยระบบที่ตรวจเงื่อนไขให้ทุกคืน (ไม่ชนเวรกลางวัน สลับชุด เลี่ยงคืนกลับจากราชการ) และเกลี่ยเวรวันหยุดให้เท่ากันทั้งเทอม ดูยอดสะสมของแต่ละคนได้ท้ายตาราง ถ้ามีธุระต้องแลกเวร แจ้งได้เลยครับ จะบันทึกและคิดค่าตอบแทนตามจริงให้';
+  const shareNoteText = () => { const el = $('#shareNote'), body = (el ? el.value : (meta.shareNote ?? DEFAULT_NOTE)).trim(); return 'ตารางเวรหอนอนเดือน' + ymLabel(view.ym) + ' ครับ' + (body ? '\n\n' + body : ''); };
+  function openShare() {
+    const fair = view.shareFair !== false, c = posterCanvas(fair), name = 'sod-schedule-' + view.ym + '.png';
+    shareCache = { text: S.lineMessage(state, view.ym, { fair }), file: null, name, url: c.toDataURL('image/png') };
+    // เตรียมไฟล์ไว้ก่อน เพราะ iPhone ให้แชร์ได้เฉพาะตอนแตะปุ่มทันที (รอสร้างไฟล์ทีหลังจะถูกปฏิเสธ)
+    if (c.toBlob) c.toBlob((b) => { if (b && shareCache && shareCache.name === name) shareCache.file = new File([b], name, { type: 'image/png' }); }, 'image/png');
+    const mi = monthInfo(view.ym);
+    dlg().innerHTML = '<form method="dialog" data-form="share"><h3>ส่งตารางไป LINE · ' + ymLabel(view.ym) + '</h3>' +
+      (mi.announcedAt ? '' : '<div class="banner warn" style="margin:8px 0"><span>ยังไม่ได้ประกาศตารางเดือนนี้ ส่งแล้วควรกด "ประกาศตาราง" ด้วย ระบบจะบันทึกการเปลี่ยนเวรต่อจากนี้</span><button type="button" class="btn sm primary" data-action="announce">ประกาศตาราง</button></div>') +
+      '<label class="chk"><input type="checkbox" id="shareFair"' + (fair ? ' checked' : '') + '> แนบสมุดสะสมเวร</label>' +
+      '<img class="share-prev" src="' + shareCache.url + '" alt="ภาพตารางเวร">' +
+      '<label class="f">ข้อความแนบกับรูป (บรรทัดแรก "ตารางเวรหอนอนเดือน' + ymLabel(view.ym) + ' ครับ" ใส่ให้อัตโนมัติ · แก้ได้ จำไว้ในเครื่องนี้)<textarea id="shareNote" rows="5">' + esc(meta.shareNote ?? DEFAULT_NOTE) + '</textarea></label>' +
+      '<div class="row" style="margin:4px 0 10px"><button type="button" class="btn sm" data-action="note-reset">ใช้ข้อความตั้งต้น</button><button type="button" class="btn sm" data-action="note-clear">ไม่แนบข้อความ</button></div>' +
+      '<div class="stack"><button type="button" class="btn primary" data-action="share-img">แชร์รูป + ข้อความ (แล้วเลือก LINE)</button><button type="button" class="btn" data-action="save-img">บันทึกรูปลงเครื่อง</button>' +
+      '<button type="button" class="btn" data-action="share-text">แชร์ข้อความ</button><button type="button" class="btn" data-action="copy-text">คัดลอกข้อความ</button></div>' +
+      '<details class="share-text"><summary>ดูข้อความที่จะส่ง</summary><pre>' + esc(shareCache.text) + '</pre></details>' +
+      '<div class="actions"><button type="button" class="btn" data-action="dlg-cancel">ปิด</button></div></form>';
+    if (!dlg().open) dlg().showModal();
+  }
+  function saveImage() { const a = document.createElement('a'); a.href = shareCache.url; a.download = shareCache.name; document.body.appendChild(a); a.click(); a.remove(); }
+  function copyText() {
+    const done = () => toast('คัดลอกแล้ว ไปวางในกลุ่ม LINE ได้เลย');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(shareCache.text).then(done).catch(() => toast('คัดลอกไม่ได้ เปิด "ดูข้อความที่จะส่ง" แล้วกดค้างเพื่อคัดลอก'));
+    else toast('คัดลอกไม่ได้ เปิด "ดูข้อความที่จะส่ง" แล้วกดค้างเพื่อคัดลอก');
+  }
+
   // ปุ่ม "เพิ่มเติม": คำสั่งที่ใช้ไม่บ่อยของหน้าตารางเวร
   function openMore() {
     const b = (action, label, cls) => '<button type="button" class="btn' + (cls ? ' ' + cls : '') + '" data-action="' + action + '">' + label + '</button>';
     dlg().innerHTML = '<form method="dialog" data-form="more"><h3>เพิ่มเติม · ' + ymLabel(view.ym) + '</h3><div class="stack" style="margin-top:12px">' +
-      b('export-csv', 'ส่งออกตารางเดือนนี้ (CSV)') + b('export-json', 'สำรองข้อมูลทั้งหมด') + b('clear', 'ล้างทุกคืนที่ไม่ล็อกในเดือนนี้', 'danger') + '</div>' +
+      b('print', 'พิมพ์ / PDF ตารางเดือนนี้') + b('export-csv', 'ส่งออกตารางเดือนนี้ (CSV)') + b('export-json', 'สำรองข้อมูลทั้งหมด') + b('clear', 'ล้างทุกคืนที่ไม่ล็อกในเดือนนี้', 'danger') + '</div>' +
       '<div class="actions"><button type="button" class="btn" data-action="dlg-cancel">ปิด</button></div></form>';
     dlg().showModal();
   }
@@ -1652,6 +1788,23 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
     if (el.closest('form[data-form=more]') && a !== 'dlg-cancel') dlg().close();
     switch (a) {
       case 'more': openMore(); break;
+      case 'share': openShare(); break;
+      case 'share-img': {
+        const text = shareNoteText(), el = $('#shareNote');
+        if (el) { meta.shareNote = el.value; saveMeta(); }
+        // คัดลอกข้อความไว้ด้วย เผื่อ LINE รับแต่รูป (กดค้างที่ช่องพิมพ์แล้ววางได้)
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(() => {});
+        const data = { files: shareCache.file ? [shareCache.file] : [], text };
+        if (shareCache.file && navigator.canShare && navigator.canShare(data)) navigator.share(data).catch(() => {});
+        else if (shareCache.file && navigator.canShare && navigator.canShare({ files: data.files })) navigator.share({ files: data.files }).catch(() => {});
+        else { saveImage(); toast('เครื่องนี้แชร์รูปตรงไม่ได้ บันทึกรูปแล้ว และคัดลอกข้อความไว้ให้ ส่งใน LINE ได้เลย'); }
+        break;
+      }
+      case 'note-reset': $('#shareNote').value = DEFAULT_NOTE; meta.shareNote = DEFAULT_NOTE; saveMeta(); break;
+      case 'note-clear': $('#shareNote').value = ''; meta.shareNote = ''; saveMeta(); break;
+      case 'save-img': saveImage(); break;
+      case 'share-text': if (navigator.share) navigator.share({ text: shareCache.text }).catch(() => {}); else copyText(); break;
+      case 'copy-text': copyText(); break;
       case 'goto': {
         if (view.tab !== 'schedule') { view.tab = 'schedule'; render(); }
         const t = document.getElementById(el.dataset.target);
@@ -1716,7 +1869,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
         const ann = {}; S.range(start, end).forEach((d) => { if ((state.schedule[d] || []).length) ann[d] = state.schedule[d].slice(); });
         state.months[view.ym] = Object.assign({}, monthInfo(view.ym), { announcedAt: new Date().toISOString(), announced: ann });
         state.months[view.ym].changes = state.months[view.ym].changes || [];
-        commit(); toast('ประกาศแล้ว อย่าลืมกด "บันทึก" แล้วส่งตารางให้ครู'); break;
+        commit(); toast('ประกาศแล้ว อย่าลืมกด "บันทึก" แล้วส่งตารางให้ครู'); if ($('#dlg form[data-form=share]')) openShare(); break;
       }
       case 'close-month': {
         const p = S.payroll(state, view.ym);
@@ -1838,6 +1991,8 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 
   document.addEventListener('change', (ev) => {
     const t = ev.target;
+    if (t.id === 'shareFair') { const el = $('#shareNote'); if (el) { meta.shareNote = el.value; saveMeta(); } view.shareFair = t.checked; openShare(); return; }
+    if (t.id === 'shareNote') { meta.shareNote = t.value; saveMeta(); return; }
     if (t.closest && t.closest('form[data-form=day]') && (t.name === 'n' || t.name === 'single')) { refreshDayPreview(); return; }
     if (t.closest && t.closest('form[data-form=swap]')) {
       if (t.id === 'swDa') $('#swNa').innerHTML = personOptions(t.value);
