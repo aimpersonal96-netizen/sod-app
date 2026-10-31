@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.5.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.5.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -111,6 +111,7 @@ details.card.legacy > summary::-webkit-details-marker { display: none; }
 details.card.legacy > summary h2 { display: inline; }
 details.card.legacy:not([open]) > summary h2 { color: var(--muted); }
 .hol-table td { padding: 6px 8px; }
+.fair-cards { display: none; }
 .hol-table td:first-child, .hol-table td:last-child { white-space: nowrap; }
 .hol-table tr.off td { opacity: .55; text-decoration: line-through; }
 .hol-table tr.off td:last-child { text-decoration: none; opacity: 1; }
@@ -311,7 +312,29 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   .receipt .r-words { font-weight: 700; margin: 10px 0 4px; }
   .receipt .r-sign { margin: 28px 0 0 auto; width: 60%; text-align: center; break-inside: avoid; }
   .receipt .r-sign p { margin: 8px 0; }
-  .card.fair { break-inside: avoid; margin-top: 10px; }
+  /* หน้าพิมพ์ตาราง: ปฏิทินราวครึ่งหน้า A4 แล้วสมุดสะสมเวรแบบการ์ดใต้ปฏิทิน ให้จบหน้าเดียว */
+  .card.fair { break-inside: avoid; margin-top: 8px; }
+  .card.fair h2 { font-size: 12pt; margin-bottom: 2px; }
+  .card.fair p.muted { font-size: 8pt; margin: 0 0 6px; color: #444; }
+  .card.fair .tablewrap { display: none !important; }
+  .fair-cards { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px; }
+  .fcard { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: 1px solid #bbb; border-radius: 8px; padding: 5px 7px; break-inside: avoid; }
+  .fcard .chip { display: inline-block; font-size: 9.5pt !important; padding: 0 8px !important; }
+  .fcard .fl { font-size: 9pt; line-height: 1.35; color: #000; }
+  .fcard .fl.muted { color: #444; }
+  .print-title h2 { font-size: 13pt; }
+  .grid { gap: 3px !important; }
+  .dow { font-size: 9.5pt !important; padding: 0 !important; }
+  .dow .full { display: inline !important; } .dow .short { display: none !important; }
+  .cell { min-height: 0 !important; height: auto !important; padding: 5px 5px !important; gap: 2px !important; border-radius: 8px !important; border-width: 1px !important; }
+  .cell .dn { font-size: 9.5pt !important; }
+  .cell .dg { font-size: 7.5pt !important; padding: 0 5px !important; }
+  .cell .dg i { display: inline !important; }
+  .cell .chips { gap: 2px !important; }
+  .chip { font-size: 10pt !important; padding: 1px 6px !important; border-radius: 7px !important; line-height: 1.35; }
+  .gt, .tagx { font-size: 7pt !important; padding: 0 5px !important; }
+  .cell.off .muted, .pend { font-size: 7pt !important; }
+  .legend { font-size: 7.5pt !important; margin-top: 6px !important; gap: 3px 6px !important; }
   .card.fair .chip { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .receipt .r-h2 { font-size: 12pt; margin: 18px 0 6px; break-after: avoid; }
   .receipt table.r-chg { font-size: 10pt; }
@@ -320,7 +343,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   main { margin: 0; padding: 0; background: none; border-radius: 0; min-height: 0; }
   .print-title { display: block; text-align: center; margin-bottom: 8px; }
   .card { border: 0; padding: 0; box-shadow: none; background: none; }
-  .cell { break-inside: avoid; min-height: 90px; background: #fff !important; box-shadow: none !important; }
+  .cell { break-inside: avoid; background: #fff !important; box-shadow: none !important; }
   .grid { grid-template-columns: repeat(7, 1fr) !important; }
   .dow, .cell.blank { display: block !important; }
   .cell { flex-direction: column !important; }
@@ -349,7 +372,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.5.0';
+  const VERSION = '1.5.1';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -970,7 +993,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.5.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.5.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -1283,6 +1306,10 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
       '<p class="muted">' + (f.term ? 'สะสมตั้งแต่ ' + be(f.from) + ' ถึง ' + be(f.to) : 'ยังไม่ได้ตั้งเทอม จึงนับเฉพาะเดือน' + ymLabel(view.ym)) + ' · นับจากตารางจริง (หลังเปลี่ยนเวร) · คืนวันหยุด = คืนวันเสาร์ คืนวันอาทิตย์ และคืนวันหยุดนักขัตฤกษ์</p>' +
       '<div class="tablewrap"><table><thead><tr><th>ครู</th><th class="num">เดือนนี้</th><th class="num">วันหยุด (เดือนนี้)</th><th class="num">สะสม' + (f.term ? 'ทั้งเทอม' : '') + '</th><th class="num">วันหยุดสะสม</th>' +
       (anyTravel ? '<th class="num">จัดในคืนกลับราชการ</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      // การ์ด (ใช้ตอนพิมพ์ใต้ปฏิทิน): ครูละใบ เดือนนี้ / สะสมทั้งเทอม
+      '<div class="fair-cards">' + f.rows.map((r) => '<div class="fcard"><span class="chip" style="' + chipStyle(r.name) + '">ครู' + esc(r.name) + '</span>' +
+        '<span class="fl"><b>เดือนนี้ ' + r.month + ' คืน</b> (หยุด ' + r.monthHol + ')</span>' + (f.term ? '<span class="fl muted">สะสม ' + r.cum + ' คืน (หยุด ' + r.cumHol + ')</span>' : '') +
+        (r.travel ? '<span class="fl">จัดในคืนกลับราชการ ' + r.travel + ' คืน</span>' : '') + '</div>').join('') + '</div>' +
       '<p class="muted" style="margin-bottom:0">ส่วนต่างสูงสุดระหว่างครูชุดเดียวกัน (สะสม) · ' + sp('M') + ' · ' + sp('F') + ' · ตัวสร้างตารางเกลี่ยจำนวนเวรสะสมก่อน แล้วจึงเวรวันหยุด</p></div>';
   }
 
