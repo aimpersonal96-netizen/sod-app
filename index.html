@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.2.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.3.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -83,6 +83,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, .cell:focus-vis
 .qa:hover .qi { border-color: var(--accent); background: #E8F5EE; }
 .qa-main .qi { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; color: #fff; }
 .hint-line { text-align: center; margin: 0 0 14px; font-size: .8rem; }
+/* สถานะเดือน: ร่าง / ประกาศแล้ว / ปิดเดือน */
+.mstat { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; max-width: 620px; margin: 0 auto 12px; padding: 8px 10px 8px 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line-soft); font-size: .85rem; }
+.mstat.on { background: #FFF6E5; border-color: #F1D3A1; } .mstat.closed { background: #E8F4EE; border-color: #B9DCC8; }
+/* ป้ายเล็กในช่องวัน: เวรเดี่ยว / แก้หลังประกาศ */
+.tagrow { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+.tagx { display: inline-block; padding: 0 6px; border-radius: 999px; font-size: .68rem; font-weight: 700; background: #FFF1D6; color: #8A5200; }
+.tagx.chg { background: #E7EEF9; color: #2B4C8C; }
 #risk, #issues { scroll-margin-top: 80px; }
 
 /* การ์ดเด่น (เลื่อนซ้าย-ขวาได้) */
@@ -200,6 +207,28 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
 .toast.show { opacity: 1; transform: translateX(-50%); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: .85rem; color: var(--muted); margin: 12px 0 0; align-items: center; }
 .print-title { display: none; }
+
+/* รายชื่อครู (แท็บครู) */
+.staff-row { border-top: 1px solid var(--line-soft); }
+.staff-row.inactive > summary { opacity: .6; }
+.staff-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 12px 2px; cursor: pointer; list-style: none; }
+.staff-head::-webkit-details-marker { display: none; }
+.staff-head::after { content: '›'; margin-left: auto; font-size: 1.3rem; line-height: 1; color: var(--muted); transition: transform .15s; }
+.staff-row[open] > .staff-head::after { transform: rotate(90deg); }
+.staff-full { font-size: .9rem; }
+.staff-n { font-size: .8rem; }
+.staff-row .staff-grid { padding: 0 2px 14px; }
+.staff-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; align-items: end; }
+.staff-grid .wide { grid-column: span 2; }
+label.chk { display: flex; align-items: center; gap: 8px; min-height: 40px; font-size: .9rem; }
+label.chk input { width: 20px; height: 20px; }
+label.f.grow { flex: 1; min-width: 200px; }
+.staff-add { margin-top: 12px; padding: 14px; border-radius: 16px; background: var(--sheet); }
+.staff-add h3 { font-size: .95rem; margin-bottom: 8px; }
+button.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* ใบลงชื่อรับค่าตอบแทน: ไม่แสดงบนจอ พิมพ์เมื่อกดปุ่ม "พิมพ์ใบลงชื่อรับเงิน" (body.print-receipt) */
+.receipt { display: none; }
 .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .kpis { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 10px 0; }
 .kpis div span { display: block; font-size: .8rem; color: var(--muted); }
@@ -230,6 +259,8 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   .cell .dg { font-size: .6rem; padding: 0 5px; }
   .cell .dg i { display: none; }
   .gt { font-size: .6rem; padding: 0 5px; }
+  .tagx { font-size: .55rem; padding: 0 3px; }
+  .mstat { border-radius: 18px; }
   .cell .chips { gap: 2px; }
   .chip { font-size: .66rem; padding: 1px 3px; border-radius: 7px; }
   .pend { font-size: .62rem; }
@@ -239,7 +270,26 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
 }
 
 @media print {
-  body { background: #fff; color: #000; }
+  @page { size: A4; margin: 14mm 12mm; }
+  body { background: #fff; color: #000; padding: 0 !important; }
+  body.print-receipt #app > * { display: none !important; }
+  body.print-receipt #app > .receipt { display: block !important; }
+  .receipt { font-size: 12.5pt; color: #000; }
+  .receipt h1 { text-align: center; font-size: 16pt; margin: 0 0 2px; }
+  .receipt .r-sub { text-align: center; margin: 0 0 10px; }
+  .receipt .r-info, .receipt .r-note { margin: 6px 0; font-size: 10.5pt; }
+  .receipt table { width: 100%; border-collapse: collapse; font-size: 11pt; }
+  .receipt th, .receipt td { border: 1px solid #000; padding: 6px 6px; vertical-align: middle; color: #000; }
+  .receipt th { font-weight: 700; text-align: center; background: none; }
+  .receipt td.sign { width: 26%; height: 40px; }
+  .receipt tfoot td { font-weight: 700; border-top: 1.5px solid #000; }
+  .receipt tr { break-inside: avoid; }
+  .receipt .r-words { font-weight: 700; margin: 10px 0 4px; }
+  .receipt .r-sign { margin: 28px 0 0 auto; width: 60%; text-align: center; break-inside: avoid; }
+  .receipt .r-sign p { margin: 8px 0; }
+  .receipt .r-h2 { font-size: 12pt; margin: 18px 0 6px; break-after: avoid; }
+  .receipt table.r-chg { font-size: 10pt; }
+  .tagx { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .top, .tabs, .banner, .noprint, .toast, .bar, .quick { display: none !important; }
   main { margin: 0; padding: 0; background: none; border-radius: 0; min-height: 0; }
   .print-title { display: block; text-align: center; margin-bottom: 8px; }
@@ -273,8 +323,8 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.2.1';
-  const SCHEMA = 3;
+  const VERSION = '1.3.0';
+  const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
   const THAI_MONTH = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -312,19 +362,19 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   // ---------- ข้อมูลตั้งต้น ----------
   function defaultState() {
     return {
-      version: 3,
+      version: 4,
       updatedAt: null,               // เวลาที่กดบันทึกล่าสุด (ISO) ใช้เทียบไฟล์สำรอง
       dormName: 'หอฟ้าทะลายโจร',
-      staff: [
-        { name: 'เก่ง', gender: 'M' }, { name: 'กาย', gender: 'M' }, { name: 'ทัย', gender: 'M' }, { name: 'เอ็ม', gender: 'M' },
-        { name: 'ยา', gender: 'F' }, { name: 'ผึ้ง', gender: 'F' }, { name: 'จี', gender: 'F' }, { name: 'เมย์', gender: 'F' }
-      ],
+      // รายชื่อครู: หัวหน้าหอกรอกเองที่แท็บครู (ไม่ใส่ชื่อในโค้ด เพราะโค้ดเผยแพร่ใน repo สาธารณะ)
+      // { name: ชื่อเล่น (ใช้อ้างอิงในตาราง), gender: 'M'|'F', prefix: 'นาย'|'นาง'|'นางสาว'|'', fullName: ชื่อ-สกุลจริง, active: ยังอยู่เวร }
+      staff: [],
+      payer: { prefix: '', fullName: '' }, // ผู้จ่ายเงิน (หัวหน้าหอ) ใช้ลงชื่อในใบรับเงิน
       // เวรกลางวัน: หมุนกลุ่ม 1–6 ทุกวัน (กลุ่ม 3 ไม่มีครูหอ)
       // anchors = จุดตั้งต้น "ตั้งแต่วัน date เป็นกลุ่ม group แล้วหมุนต่อ" ใช้จุดล่าสุดที่ไม่เกินวันนั้น
       // (เมื่อตารางกลางวันตั้งต้นใหม่ ให้เพิ่มจุดใหม่ เดือนเก่าจะไม่เปลี่ยน)
       dayGroups: {
         anchors: [{ date: '2026-10-28', group: 4 }],
-        of: { กาย: 1, เก่ง: 2, ยา: 2, ผึ้ง: 2, เอ็ม: 4, เมย์: 4, ทัย: 5, จี: 6 }
+        of: {}                       // { ชื่อเล่น: กลุ่ม 1–6 }
       },
       firstNightDate: '2026-11-02',  // คืนแรกที่มีเวรนอน
       firstNightGender: 'F',         // คืนแรกเป็นชุดหญิง
@@ -332,16 +382,24 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       unavailable: {},               // { ชื่อ: [วันที่] }
       schedule: {},                  // { วันที่เริ่มเวร: [ชื่อ, ชื่อ] }
       locked: {},                    // { วันที่: true } ตัวสร้างอัตโนมัติไม่แตะ
+      single: {},                    // { วันที่: true } เวรเดี่ยว: นักเรียนไม่ถึงเกณฑ์ ครูอยู่คนเดียว ได้ค่าตอบแทน 2 ส่วน (ตัวสร้างไม่แตะ)
+      months: {},                    // { 'yyyy-mm': { announcedAt, announced: {วันที่: [ชื่อ]}, changes: [{at, date, from, to, reason}], closedAt } }
       payroll: {}                    // { 'yyyy-mm': ยอดการเงิน }
     };
   }
 
+  // ครูที่ยังอยู่เวร (ตัวสร้างใช้เฉพาะกลุ่มนี้ ครูที่ย้ายออกยังอยู่ในประวัติและค่าตอบแทนเดือนเก่า)
+  const activeStaff = (state) => state.staff.filter((s) => s.active !== false);
   const genderOf = (state, name) => { const s = state.staff.find((x) => x.name === name); return s ? s.gender : null; };
   function pairGender(state, names) {
     if (!names || names.length !== 2 || names[0] === names[1]) return null;
     const a = genderOf(state, names[0]), b = genderOf(state, names[1]);
     return a && a === b ? a : null;
   }
+  // เวรเดี่ยวที่ถูกต้อง = ตั้งเป็นเวรเดี่ยว และมีครู 1 คนพอดี
+  const isSingle = (state, d) => !!(state.single || {})[d] && (state.schedule[d] || []).length === 1;
+  // ชุดของคืน: คู่เพศเดียวกัน หรือเพศของครูเวรเดี่ยว (ใช้สลับชุด B2/B3) ใช้ null ถ้ายังไม่ใช่ชุดที่สมบูรณ์
+  const nightGender = (state, d) => (isSingle(state, d) ? genderOf(state, state.schedule[d][0]) : pairGender(state, state.schedule[d]));
   const dayGroup = (state, date) => {
     let best = null, first = null;
     state.dayGroups.anchors.forEach((x) => {
@@ -351,15 +409,19 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     const a = best || first; // วันก่อนจุดแรก: ขยายย้อนหลังจากจุดแรก
     return (((diffDays(date, a.date) + a.group - 1) % 6) + 6) % 6 + 1;
   };
-  const isSupportedVersion = (v) => v === 2 || v === 3;
-  // แปลงข้อมูลเวอร์ชัน 2 (anchorDate/anchorGroup ค่าเดียว) เป็นเวอร์ชัน 3 (anchors หลายจุด) ไม่แก้ต้นฉบับ
+  const isSupportedVersion = (v) => v === 2 || v === 3 || v === 4;
+  // แปลงข้อมูลเก่าเป็นเวอร์ชันปัจจุบัน ไม่แก้ต้นฉบับ
+  // 2 → 3: anchorDate/anchorGroup ค่าเดียว → anchors หลายจุด · 3 → 4: ครูมี prefix/fullName/active และมี payer
   function migrate(obj) {
     const o = JSON.parse(JSON.stringify(obj || {}));
     const dg = o.dayGroups = o.dayGroups || {};
     if ((!Array.isArray(dg.anchors) || !dg.anchors.length) && dg.anchorDate && dg.anchorGroup) dg.anchors = [{ date: dg.anchorDate, group: Number(dg.anchorGroup) }];
     delete dg.anchorDate; delete dg.anchorGroup;
     if (Array.isArray(dg.anchors)) dg.anchors = dg.anchors.filter((a) => a && isIso(a.date) && a.group >= 1 && a.group <= 6).map((a) => ({ date: a.date, group: Number(a.group) })).sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0));
-    if (o.version === undefined || o.version === 2) o.version = 3;
+    if (Array.isArray(o.staff)) o.staff = o.staff.map((x) => Object.assign({ prefix: '', fullName: '' }, x, { active: x.active !== false }));
+    o.payer = Object.assign({ prefix: '', fullName: '' }, o.payer);
+    o.single = o.single || {}; o.months = o.months || {};
+    if (o.version === undefined || o.version < SCHEMA) o.version = SCHEMA;
     return o;
   }
   const dayMembers = (state, date) => state.staff.filter((s) => state.dayGroups.of[s.name] === dayGroup(state, date)).map((s) => s.name);
@@ -384,7 +446,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     return null;
   }
   const eligible = (state, d, g, withUnavailable) =>
-    state.staff.filter((s) => s.gender === g && !excludedReason(state, s.name, d, withUnavailable)).map((s) => s.name);
+    activeStaff(state).filter((s) => s.gender === g && !excludedReason(state, s.name, d, withUnavailable)).map((s) => s.name);
 
   // ---------- ตัวตรวจกติกา B1–B4 ----------
   function validate(state, from, to) {
@@ -397,13 +459,15 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       if (!names.length) { if (duty) add('P', 'warn', d, [], 'รอหัวหน้าหอ: ยังไม่มีครูเวรคืนนี้'); return; }
       if (!duty) add('P', 'warn', d, names, 'คืนนี้อยู่นอกช่วงที่มีเวร');
       names.forEach((n) => { if (!genderOf(state, n)) add('B1', 'error', d, [n], 'ชื่อ "' + n + '" ไม่อยู่ในรายชื่อครู'); });
-      if (names.length !== 2) add('P', 'warn', d, names, 'มีครู ' + names.length + ' คน (ต้องการ 2 คน)');
+      const single = !!(state.single || {})[d];
+      if (single && names.length !== 1) add('P', 'warn', d, names, 'ตั้งเป็นเวรเดี่ยว แต่มีครู ' + names.length + ' คน');
+      else if (!single && names.length !== 2) add('P', 'warn', d, names, 'มีครู ' + names.length + ' คน (ต้องการ 2 คน)');
       if (new Set(names).size !== names.length) add('B1', 'error', d, names, 'มีชื่อซ้ำในคืนเดียวกัน');
       const gs = new Set(names.map((n) => genderOf(state, n)).filter(Boolean));
       if (names.length >= 2 && gs.size > 1) add('B1', 'error', d, names, 'คู่เวรต่างเพศ (ต้องชช/ญญ)');
-      const pg = pairGender(state, names), pd = prevDutyNight(state, d), prev = pd && sched[pd];
+      const pg = nightGender(state, d), pd = prevDutyNight(state, d), prev = pd && sched[pd];
       if (pg && prev) {
-        const pp = pairGender(state, prev);
+        const pp = nightGender(state, pd);
         if (pp && pp === pg) add(monthOf(pd) !== monthOf(d) ? 'B3' : 'B2', 'error', d, names, 'คืนก่อนหน้าเป็นชุด' + GENDER_LABEL[pg] + 'เหมือนกัน ต้องสลับชุด');
       }
       names.forEach((n) => {
@@ -421,21 +485,24 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   function monthStats(state, ym) {
     const { start, end } = monthRange(ym);
     const nightList = range(start, end).filter((d) => isDutyNight(state, d));
-    const counts = {};
-    state.staff.forEach((s) => { counts[s.name] = 0; });
-    nightList.forEach((d) => (state.schedule[d] || []).forEach((n) => { if (n in counts) counts[n]++; }));
-    const pending = nightList.filter((d) => (state.schedule[d] || []).length !== 2);
-    return { ym, start, end, nights: nightList.length, nightList, counts, pending };
+    const counts = {}, singles = {}, shares = {};   // คืนที่ขึ้นเวร · ในนั้นเป็นเวรเดี่ยวกี่คืน · ส่วนที่ได้ (เวรเดี่ยว = 2 ส่วน)
+    state.staff.forEach((s) => { counts[s.name] = 0; singles[s.name] = 0; shares[s.name] = 0; });
+    nightList.forEach((d) => {
+      const one = isSingle(state, d);
+      (state.schedule[d] || []).forEach((n) => { if (n in counts) { counts[n]++; shares[n] += one ? 2 : 1; if (one) singles[n]++; } });
+    });
+    const pending = nightList.filter((d) => (state.schedule[d] || []).length !== 2 && !isSingle(state, d));
+    return { ym, start, end, nights: nightList.length, nightList, counts, singles, shares, pending };
   }
 
-  // N = ยอดการเงิน ÷ จำนวนคืนที่มีเวรจริงในเดือน · X = N ÷ 2 · ค่าตอบแทน = X × จำนวนเวร (ไม่ปัดเศษ)
+  // N = ยอดการเงิน ÷ จำนวนคืนที่มีเวรจริงในเดือน · X = N ÷ 2 · ค่าตอบแทน = X × จำนวนส่วน (เวรปกติ 1 ส่วน เวรเดี่ยว 2 ส่วน) ไม่ปัดเศษ
   function payroll(state, ym) {
     const st = monthStats(state, ym);
     const raw = (state.payroll || {})[ym];
     const amount = raw === undefined || raw === '' || raw === null || isNaN(Number(raw)) ? null : Number(raw);
     const N = amount !== null && st.nights ? amount / st.nights : null;
     const X = N === null ? null : N / 2;
-    const rows = state.staff.map((s) => ({ name: s.name, gender: s.gender, count: st.counts[s.name], pay: X === null ? null : X * st.counts[s.name] }));
+    const rows = state.staff.filter((s) => s.active !== false || st.counts[s.name]).map((s) => ({ name: s.name, gender: s.gender, count: st.counts[s.name], singles: st.singles[s.name], shares: st.shares[s.name], pay: X === null ? null : X * st.shares[s.name] }));
     const total = X === null ? null : rows.reduce((a, r) => a + r.pay, 0);
     return { ym, amount, nights: st.nights, N, X, rows, total, pending: st.pending };
   }
@@ -458,12 +525,11 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     let prev = null;
     for (let i = keys.length - 1; i >= 0; i--) {
       if (keys[i] >= nights[0]) continue;
-      const g = pairGender(state, state.schedule[keys[i]]);
+      const g = nightGender(state, keys[i]);
       if (g) { prev = g; break; }
     }
     nights.forEach((d) => {
-      const names = state.schedule[d];
-      let g = names && names.length ? pairGender(state, names) : null;
+      let g = (state.schedule[d] || []).length ? nightGender(state, d) : null;
       if (!g) g = prev ? opp(prev) : state.firstNightGender;
       out[d] = g; prev = g;
     });
@@ -475,10 +541,11 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     const { start, end } = monthRange(ym);
     const nights = range(start, end).filter((d) => isDutyNight(state, d));
     const sched = Object.assign({}, state.schedule);
-    nights.forEach((d) => { if (!state.locked[d]) delete sched[d]; });
+    const keep = (d) => state.locked[d] || (state.single || {})[d]; // คืนที่ล็อก และเวรเดี่ยว ตัวสร้างไม่แตะ
+    nights.forEach((d) => { if (!keep(d)) delete sched[d]; });
     const tmp = Object.assign({}, state, { schedule: sched });
     const gender = planGenders(tmp, nights);
-    const free = nights.filter((d) => !state.locked[d] && !(sched[d] && sched[d].length));
+    const free = nights.filter((d) => !keep(d) && !(sched[d] && sched[d].length));
     const pool = {}, pending = [], work = [];
     free.forEach((d) => {
       pool[d] = eligible(tmp, d, gender[d]);
@@ -497,7 +564,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     const names = state.staff.map((s) => s.name);
     const cnt = {}; names.forEach((n) => { cnt[n] = 0; });
     nights.forEach((d) => { if (sched[d] && sched[d].length && !free.includes(d)) sched[d].forEach((n) => { if (n in cnt) cnt[n]++; }); });
-    const size = { M: state.staff.filter((s) => s.gender === 'M').length, F: state.staff.filter((s) => s.gender === 'F').length };
+    const act = activeStaff(state), size = { M: act.filter((s) => s.gender === 'M').length, F: act.filter((s) => s.gender === 'F').length };
     const slots = { M: 0, F: 0 };
     nights.forEach((d) => { if (!pending.includes(d) && (free.includes(d) || (sched[d] || []).length)) slots[gender[d]] += 2; });
     const remain = work.map((d, i) => ({ M: work.slice(i).filter((x) => gender[x] === 'M').length, F: work.slice(i).filter((x) => gender[x] === 'F').length }));
@@ -517,7 +584,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       const base = Object.assign({}, cnt);
       function rec(i) {
         if (aborted) return false;
-        for (const s of state.staff) if (floor[s.gender] - cnt[s.name] > remain[i][s.gender]) return false;
+        for (const s of act) if (floor[s.gender] - cnt[s.name] > remain[i][s.gender]) return false;
         if (i === work.length) return true;
         if (++nodes > 150000) { aborted = true; return false; }
         const d = work[i], g = gender[d];
@@ -572,7 +639,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   function explainNight(state, d) {
     const g = planGenders(state, [d])[d];
     return { gender: g, eligible: eligible(state, d, g),
-      excluded: state.staff.filter((s) => s.gender === g).map((s) => ({ name: s.name, reason: excludedReason(state, s.name, d) })).filter((x) => x.reason) };
+      excluded: activeStaff(state).filter((s) => s.gender === g).map((s) => ({ name: s.name, reason: excludedReason(state, s.name, d) })).filter((x) => x.reason) };
   }
 
   // ---------- สลับครู ----------
@@ -586,6 +653,64 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     return { ok: true, schedule: Object.assign({}, state.schedule, { [a.date]: sa, [b.date]: sb }) };
   }
 
+
+  // ---------- รายชื่อครู ----------
+  // เปลี่ยนชื่อเล่น: แก้ทุกที่ที่อ้างถึง (ตาราง วันไม่ว่าง กลุ่มกลางวัน) คืน state ใหม่ ไม่แก้ต้นฉบับ
+  function renameStaff(state, from, to) {
+    to = String(to || '').trim();
+    if (!to) return { ok: false, error: 'ชื่อเล่นว่างไม่ได้' };
+    if (to === from) return { ok: true, state };
+    if (state.staff.some((s) => s.name === to)) return { ok: false, error: 'มีครูชื่อ "' + to + '" อยู่แล้ว' };
+    if (!state.staff.some((s) => s.name === from)) return { ok: false, error: 'ไม่พบครูชื่อ "' + from + '"' };
+    const st = JSON.parse(JSON.stringify(state));
+    st.staff.forEach((s) => { if (s.name === from) s.name = to; });
+    Object.keys(st.schedule).forEach((d) => { st.schedule[d] = st.schedule[d].map((n) => (n === from ? to : n)); });
+    if (st.unavailable[from]) { st.unavailable[to] = st.unavailable[from]; delete st.unavailable[from]; }
+    if (from in st.dayGroups.of) { st.dayGroups.of[to] = st.dayGroups.of[from]; delete st.dayGroups.of[from]; }
+    const swap = (ns) => (ns || []).map((n) => (n === from ? to : n));
+    Object.values(st.months || {}).forEach((m) => {   // ตารางที่ประกาศ และบันทึกการเปลี่ยนเวร ใช้ชื่อใหม่ด้วย
+      if (m.announced) Object.keys(m.announced).forEach((d) => { m.announced[d] = swap(m.announced[d]); });
+      (m.changes || []).forEach((c) => { c.from = swap(c.from); c.to = swap(c.to); });
+    });
+    return { ok: true, state: st };
+  }
+  // คืนที่ตารางเปลี่ยน (เทียบก่อน-หลัง) ใช้บันทึกการเปลี่ยนเวรหลังประกาศ: [{date, from, to}] เรียงตามวันที่
+  function scheduleDiff(before, after, dates) {
+    const keys = dates || Array.from(new Set(Object.keys(before || {}).concat(Object.keys(after || {})))).sort();
+    return keys.map((d) => ({ date: d, from: ((before || {})[d] || []).slice(), to: ((after || {})[d] || []).slice() }))
+      .filter((x) => x.from.join('|') !== x.to.join('|'));
+  }
+
+  // จำนวนคืนในตาราง (ทุกเดือน) ที่มีครูคนนี้ ใช้ตัดสินว่าลบได้ไหม (มีประวัติ = ลบไม่ได้ ให้ตั้งเป็น "ย้ายออก")
+  const staffUsage = (state, name) => Object.keys(state.schedule).filter((d) => (state.schedule[d] || []).includes(name)).length;
+  // ชื่อที่ใช้ในเอกสาร: คำนำหน้า + ชื่อ-สกุลจริง ถ้ายังไม่กรอกใช้ "ครู" + ชื่อเล่น
+  const formalName = (s) => (s && s.fullName ? (s.prefix || '') + s.fullName : s ? 'ครู' + s.name : '');
+
+  // จำนวนเงินเป็นตัวอักษรไทย (แบบ BAHTTEXT) เช่น 7000 → เจ็ดพันบาทถ้วน
+  function bahtText(amount) {
+    const DIG = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'], POS = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน'];
+    function read(n, higher) { // n < 1,000,000
+      const s = String(n); let out = '';
+      for (let i = 0; i < s.length; i++) {
+        const d = Number(s[i]), pos = s.length - 1 - i;
+        if (!d) continue;
+        if (pos === 1) out += d === 1 ? 'สิบ' : d === 2 ? 'ยี่สิบ' : DIG[d] + 'สิบ';
+        else if (pos === 0 && d === 1 && (s.length > 1 || higher)) out += 'เอ็ด';
+        else out += DIG[d] + POS[pos];
+      }
+      return out;
+    }
+    function words(n) {
+      if (n === 0) return DIG[0];
+      const parts = []; let higher = false;
+      while (n > 0) { parts.unshift(n % 1000000); n = Math.floor(n / 1000000); }
+      return parts.map((p, i) => { const w = read(p, i > 0 && higher); higher = higher || p > 0; return w + (i < parts.length - 1 ? 'ล้าน' : ''); }).join('');
+    }
+    if (amount === null || amount === undefined || isNaN(Number(amount))) return '';
+    const neg = Number(amount) < 0, cents = Math.round(Math.abs(Number(amount)) * 100);
+    const baht = Math.floor(cents / 100), st = cents % 100;
+    return (neg ? 'ลบ' : '') + (baht || !st ? words(baht) + 'บาท' : '') + (st ? words(st) + 'สตางค์' : 'ถ้วน');
+  }
 
   // ---------- สำรองข้อมูล / ประวัติเวอร์ชัน (ฟังก์ชันล้วน ทดสอบได้) ----------
   function summarizeState(st) {
@@ -691,7 +816,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
 
   return { VERSION, SCHEMA, isSupportedVersion, migrate, THAI_DOW, THAI_MONTH, SHORT_MONTH, GENDER_LABEL, GENDER_SHORT,
     parse, fmt, addDays, diffDays, dow, range, isIso, monthOf, monthRange, addMonth,
-    defaultState, genderOf, pairGender, dayGroup, dayMembers, isDutyNight, excludedReason, eligible,
+    defaultState, activeStaff, isSingle, nightGender, scheduleDiff, renameStaff, staffUsage, formalName, bahtText, genderOf, pairGender, dayGroup, dayMembers, isDutyNight, excludedReason, eligible,
     validate, monthStats, payroll, planGenders, generate, capacityWarnings, explainNight, swapTeachers,
     summarizeState, backupFileName, compareBackup, hashString, pushHistory,
     b64encodeUtf8, b64decodeUtf8, GhError, ghValidate, ghGet, ghPut };
@@ -701,7 +826,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.2.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.3.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -714,6 +839,8 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     if (!Array.isArray(st.dayGroups.anchors) || !st.dayGroups.anchors.length) st.dayGroups.anchors = base.dayGroups.anchors.slice();
     ['unavailable', 'schedule', 'locked', 'payroll'].forEach((k) => { st[k] = st[k] || {}; });
     st.noDuty = st.noDuty || [];
+    st.payer = Object.assign({ prefix: '', fullName: '' }, st.payer);
+    st.single = st.single || {}; st.months = st.months || {};
     delete st.exportedAt; delete st.appVersion; // ฟิลด์ที่มีเฉพาะในไฟล์สำรอง/GitHub
     return st;
   }
@@ -735,7 +862,22 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     state = draft || saved || S.defaultState();
   })();
   const isDirty = () => JSON.stringify(state) !== savedJson;
-  function commit() { write(KEY_DRAFT, JSON.stringify(state)); render(); }
+  function commit() { logChanges(); write(KEY_DRAFT, JSON.stringify(state)); render(); }
+  // บันทึกการเปลี่ยนเวร: ทุกครั้งที่แก้ตารางของเดือนที่ "ประกาศแล้ว" (และยังไม่ปิด) ระบบจดว่าคืนไหน เดิมใคร เปลี่ยนเป็นใคร
+  // ถ้าข้อมูลทั้งชุดถูกแทนที่ (นำเข้า ย้อนกลับ ดึงจาก GitHub เปลี่ยนชื่อครู ยกเลิกการแก้ไข) ไม่ใช่การเปลี่ยนเวร จึงไม่จด
+  let shadow = { ref: state, json: JSON.stringify(state.schedule) }, pendingReason = '';
+  function logChanges() {
+    if (shadow.ref === state) {
+      S.scheduleDiff(JSON.parse(shadow.json), state.schedule).forEach((c) => {
+        const m = state.months[c.date.slice(0, 7)];
+        if (m && m.announcedAt && !m.closedAt) (m.changes = m.changes || []).push({ at: new Date().toISOString(), date: c.date, from: c.from, to: c.to, reason: pendingReason });
+      });
+    }
+    pendingReason = ''; shadow = { ref: state, json: JSON.stringify(state.schedule) };
+  }
+  const monthInfo = (ym) => state.months[ym] || {};
+  const isClosed = (dateOrYm) => !!monthInfo(dateOrYm.slice(0, 7)).closedAt;
+  const isAnnounced = (dateOrYm) => !!monthInfo(dateOrYm.slice(0, 7)).announcedAt;
 
   // เมตาของเครื่องนี้ (ไม่อยู่ในไฟล์สำรอง): เวลาและลายนิ้วมือของการสำรองล่าสุด
   const KEY_META = 'sod-v2-meta', KEY_HISTORY = 'sod-v2-history';
@@ -762,7 +904,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   // ซิงก์ GitHub: ปิดไว้เป็นค่าเริ่มต้น token เก็บเฉพาะที่นี่ (ไม่อยู่ใน state ไฟล์สำรอง หรือประวัติเวอร์ชัน)
   const KEY_SYNC = 'sod-v2-sync';
   const defaultLabel = () => (/iPhone|iPad/.test(navigator.userAgent) ? 'iPhone' : /Mac/.test(navigator.userAgent) ? 'Mac' : 'เครื่องนี้');
-  let sync = { enabled: false, repo: 'aimpersonal96-netizen/Duty_roster-SSod-', path: 'data/latest.json', token: '', label: '', lastSyncAt: null, lastRemoteSha: null, pendingPush: false };
+  let sync = { enabled: false, repo: '', path: 'data/latest.json', token: '', label: '', lastSyncAt: null, lastRemoteSha: null, pendingPush: false };
   try { sync = Object.assign(sync, JSON.parse(read(KEY_SYNC) || '{}')); } catch (e) { /* ใช้ค่าเริ่มต้น */ }
   const saveSync = () => write(KEY_SYNC, JSON.stringify(sync));
   const syncCfg = () => ({ repo: sync.repo, path: sync.path, token: sync.token });
@@ -832,15 +974,17 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     $('#hero').innerHTML = heroHtml();
     const body = { schedule: renderSchedule, summary: renderSummary, people: renderPeople, settings: renderSettings }[view.tab]();
     const mismatch = S.VERSION !== APP_VERSION ? '<div class="banner err noprint"><strong>ไฟล์ตัวแอปไม่ตรงกัน</strong><span>core.js เวอร์ชัน ' + S.VERSION + ' แต่ app.js เวอร์ชัน ' + APP_VERSION + ' อัปโหลดไฟล์ให้ครบและเป็นชุดเดียวกัน</span></div>' : '';
-    $('#app').innerHTML = mismatch + (view.tab === 'settings' ? '' : monthBar()) + saveBar() + body;
+    $('#app').innerHTML = mismatch + (view.tab === 'settings' ? '' : monthBar()) + '<div id="savebar">' + saveBar() + '</div>' + body;
   }
+  // บันทึกแบบร่างโดยไม่วาดหน้าใหม่ทั้งหน้า (ใช้กับช่องพิมพ์ข้อความ เพื่อไม่ให้ช่องที่ผู้ใช้แตะต่อหลุดโฟกัส)
+  function commitSoft() { write(KEY_DRAFT, JSON.stringify(state)); $('#savebar').innerHTML = saveBar(); $('#hero').innerHTML = heroHtml(); }
 
   // หัวแอป: ทักทาย + กระดิ่ง (จำนวนรายการที่ต้องดูของเดือน) · ตัวเลขใหญ่ = คืนที่จัดครบ 2 คน / คืนเวรทั้งเดือน · แถวเวรคืนนี้
   function heroHtml() {
     const { start, end } = monthRange(), issues = S.validate(state, start, end), c = monthCounts(issues);
     const alerts = issues.filter((i) => i.level !== 'info').length + S.capacityWarnings(state, view.ym).length;
     const st = S.monthStats(state, view.ym), done = st.nights - st.pending.length;
-    const pill = !st.nights ? '' : c.errN ? '<span class="pill pill-err">ผิด ' + c.errN + '</span>'
+    const pill = !st.nights ? '' : isClosed(view.ym) ? '<span class="pill">🔒 ปิดเดือนแล้ว</span>' : c.errN ? '<span class="pill pill-err">ผิด ' + c.errN + '</span>'
       : c.pendN ? '<span class="pill pill-warn">รอ ' + c.pendN + ' คืน</span>' : '<span class="pill">✓ ผ่านครบ</span>';
     const d = localToday(), ns = state.schedule[d] || [];
     const who = !S.isDutyNight(state, d) ? '<span class="hero-none">ไม่มีเวร</span>'
@@ -872,7 +1016,8 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   function featHtml(total, errN, pendN, riskN) {
     const btn = (label, attrs) => '<button class="feat-btn" ' + attrs + '>' + label + '</button>';
     const slides = [];
-    if (!total) slides.push(['warn', 'เดือนนี้ไม่มีเวร', 'ตรวจ "วันเริ่มเวรแรก" และ "ช่วงงดเวร" ในแท็บตั้งค่า', btn('ไปตั้งค่า', 'data-action="tab" data-tab="settings"')]);
+    if (!S.activeStaff(state).length) slides.push(['warn', 'ยังไม่มีรายชื่อครู', 'เพิ่มครู (ชื่อเล่น ชุด กลุ่มเวรกลางวัน) ที่แท็บครู ก่อนสร้างตาราง', btn('เพิ่มครู', 'data-action="tab" data-tab="people"')]);
+    else if (!total) slides.push(['warn', 'เดือนนี้ไม่มีเวร', 'ตรวจ "วันเริ่มเวรแรก" และ "ช่วงงดเวร" ในแท็บตั้งค่า', btn('ไปตั้งค่า', 'data-action="tab" data-tab="settings"')]);
     else if (errN) slides.push(['err', 'ผิดเงื่อนไข ' + errN + ' รายการ', pendN ? 'และรอหัวหน้าหอ ' + pendN + ' คืน' : 'คืนที่ผิดมีกรอบสีแดงในปฏิทิน', btn('ดูรายการ', 'data-action="goto" data-target="issues"')]);
     else if (pendN) slides.push(['warn', 'รอหัวหน้าหอ ' + pendN + ' คืน', 'ยังไม่มีครูเวร แตะวันที่ในปฏิทินเพื่อจัดเอง', btn('ดูรายการ', 'data-action="goto" data-target="issues"')]);
     else slides.push(['ok', 'ผ่านเงื่อนไขพื้นฐานครบ', 'คู่เพศเดียวกัน · สลับชุด · ไม่ชนเวรกลางวัน', btn('พิมพ์ตาราง', 'data-action="print"')]);
@@ -889,8 +1034,8 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     const cards = days.map((d) => {
       const top = '<span class="wkc-top"><b>' + Number(d.slice(8)) + '</b><span>' + S.THAI_DOW[S.dow(d)] + '<br>' + S.SHORT_MONTH[Number(d.slice(5, 7)) - 1] + '</span>' + (d === t ? '<em>คืนนี้</em>' : '') + '</span>';
       if (!S.isDutyNight(state, d)) return '<div class="wkc off">' + top + '<span class="wkc-bot"><span class="muted">ไม่มีเวร</span></span></div>';
-      const ns = state.schedule[d] || [], g = ns.length ? (S.pairGender(state, ns) || genders[d]) : genders[d];
-      return '<button class="wkc wkc-' + g + '" data-action="edit" data-date="' + d + '">' + top + '<span class="wkc-bot"><span class="wkc-tags">' + gtag(g) + '<span class="wkc-dg">กลุ่ม ' + S.dayGroup(state, d) + '</span>' + (state.locked[d] ? ' 🔒' : '') + '</span>' +
+      const ns = state.schedule[d] || [], g = ns.length ? (S.nightGender(state, d) || genders[d]) : genders[d];
+      return '<button class="wkc wkc-' + g + '" data-action="edit" data-date="' + d + '">' + top + '<span class="wkc-bot"><span class="wkc-tags">' + gtag(g) + '<span class="wkc-dg">กลุ่ม ' + S.dayGroup(state, d) + '</span>' + (S.isSingle(state, d) ? '<span class="tagx">เดี่ยว</span>' : '') + (state.locked[d] ? ' 🔒' : '') + '</span>' +
         (ns.length ? ns.map((n) => '<span class="chip" style="' + chipStyle(n) + '">ครู' + esc(n) + '</span>').join('') : '<span class="pend">รอหัวหน้าหอ</span>') + '</span></button>';
     }).join('');
     return '<div class="noprint"><h2 class="sec">เวร 7 คืนข้างหน้า</h2><div class="wk-track">' + cards + '</div></div>';
@@ -945,11 +1090,12 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       const head = '<span class="dn"><span class="num">' + Number(d.slice(8)) + '<span class="wk">' + S.THAI_DOW[w] + '</span></span><span class="meta"><span class="dg"><i>กลุ่ม </i>' + S.dayGroup(state, d) + '</span>' + (state.locked[d] ? ' 🔒' : '') + '</span></span>';
       if (!S.isDutyNight(state, d)) { cells += '<div class="cell off' + cls + '">' + head + '<span class="body"><span class="muted">ไม่มีเวร</span></span></div>'; return; }
       const ns = state.schedule[d] || [];
-      const g = ns.length ? (S.pairGender(state, ns) || genders[d]) : genders[d];
-      const b = by[d];
+      const g = ns.length ? (S.nightGender(state, d) || genders[d]) : genders[d];
+      const b = by[d], changed = (monthInfo(view.ym).changes || []).some((c) => c.date === d);
       const flag = b ? (b.level === 'error' ? ' has-err' : ' has-warn') : '';
       const inner = ns.length ? '<span class="chips">' + ns.map((n) => '<span class="chip" style="' + chipStyle(n) + '">ครู' + esc(n) + '</span>').join('') + '</span>' : '<span class="pend">รอหัวหน้าหอ</span>';
-      cells += '<button class="cell' + cls + flag + '" data-action="edit" data-date="' + d + '"' + (b ? ' title="' + esc(b.msgs.join('\n')) + '"' : '') + '>' + head + '<span class="body">' + gtag(g) + inner + '</span></button>';
+      const tags = gtag(g) + (S.isSingle(state, d) ? '<span class="tagx">เดี่ยว</span>' : '') + (changed ? '<span class="tagx chg noprint" title="เปลี่ยนหลังประกาศ">แก้</span>' : '');
+      cells += '<button class="cell' + cls + flag + '" data-action="edit" data-date="' + d + '"' + (b ? ' title="' + esc(b.msgs.join('\n')) + '"' : '') + '>' + head + '<span class="body"><span class="tagrow">' + tags + '</span>' + inner + '</span></button>';
     });
 
     const riskHtml = risk.length ? '<div class="card noprint" id="risk"><h2>ช่วงเสี่ยง (ครูไม่ว่างทำให้ชุดเหลือน้อย)</h2><ul class="issues">' +
@@ -961,20 +1107,29 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     const total = nights.filter((d) => S.isDutyNight(state, d)).length;
 
     const qa = (action, ic, label, cls) => '<button class="qa' + (cls ? ' ' + cls : '') + '" data-action="' + action + '"><span class="qi">' + icon(ic) + '</span><span>' + label + '</span></button>';
-    return '<div class="quick noprint">' + qa('generate', 'sparkle', 'สร้างตาราง', 'qa-main') + qa('swap-open', 'swap', 'สลับครู') + qa('print', 'printer', 'พิมพ์ / PDF') + qa('more', 'more', 'เพิ่มเติม') + '</div>' +
+    const mi = monthInfo(view.ym), nChg = (mi.changes || []).length;
+    const status = mi.closedAt ? '<div class="mstat noprint closed"><span>🔒 <b>ปิดเดือนแล้ว</b> ' + dt(mi.closedAt) + ' · แก้ตารางไม่ได้</span><button class="btn sm" data-action="tab" data-tab="summary">ดูที่แท็บสรุป</button></div>'
+      : mi.announcedAt ? '<div class="mstat noprint on"><span>📣 <b>ประกาศแล้ว</b> ' + dt(mi.announcedAt) + ' · เปลี่ยนหลังประกาศ ' + nChg + ' ครั้ง (ระบบบันทึกให้)</span><button class="btn sm" data-action="tab" data-tab="summary">ดูบันทึก</button></div>'
+      : '<div class="mstat noprint"><span>📝 <b>ร่าง</b> · ยังไม่ประกาศ</span><button class="btn sm primary" data-action="announce">ประกาศตาราง</button></div>';
+    return '<div class="quick noprint">' + qa('generate', 'sparkle', 'สร้างตาราง', 'qa-main') + qa('swap-open', 'swap', 'สลับครู') + qa('print', 'printer', 'พิมพ์ / PDF') + qa('more', 'more', 'เพิ่มเติม') + '</div>' + status +
       '<p class="muted noprint hint-line">แตะที่วันเพื่อแก้ไขหรือล็อกคืน · ตัวสร้างอัตโนมัติจะไม่แตะคืนที่ล็อก และไม่ผ่อนเงื่อนไขเอง คืนที่จัดไม่ได้จะเป็น "รอหัวหน้าหอ"</p>' + note +
       featHtml(total, errN, pendN, risk.length) + weekHtml() + riskHtml +
       '<div class="card"><div class="print-title"><h2>ตารางเวรหอนอน หอฟ้าทะลายโจร · ' + ymLabel(view.ym) + '</h2></div><div class="grid">' + cells + '</div>' +
-      '<div class="legend">' + gtag('M') + ' ชุดชาย ' + gtag('F') + ' ชุดหญิง · "กลุ่ม n" = เวรกลางวันของวันนั้น · ' + state.staff.map((s) => '<span class="chip" style="display:inline-block;' + chipStyle(s.name) + '">ครู' + esc(s.name) + '</span>').join(' ') + '</div></div>' +
+      '<div class="legend">' + gtag('M') + ' ชุดชาย ' + gtag('F') + ' ชุดหญิง · "กลุ่ม n" = เวรกลางวันของวันนั้น · ' + S.activeStaff(state).map((s) => '<span class="chip" style="display:inline-block;' + chipStyle(s.name) + '">ครู' + esc(s.name) + '</span>').join(' ') + '</div></div>' +
       issuesHtml;
   }
 
+  // วันที่ (เลขวัน) ที่ครูขึ้นเวรในเดือนที่กำลังดู
+  const dutyDates = (n, markSingle) => { const { start, end } = monthRange(); return S.range(start, end).filter((d) => S.isDutyNight(state, d) && (state.schedule[d] || []).includes(n)).map((d) => Number(d.slice(8)) + (markSingle && S.isSingle(state, d) ? ' (เดี่ยว)' : '')); };
+  const staffOf = (n) => state.staff.find((s) => s.name === n);
+  const PREFIXES = ['', 'นาย', 'นาง', 'นางสาว'];
+  const prefixOptions = (sel) => PREFIXES.map((x) => '<option value="' + x + '"' + ((sel || '') === x ? ' selected' : '') + '>' + (x || '–') + '</option>').join('');
+
   function renderSummary() {
     const p = S.payroll(state, view.ym);
-    const { start, end } = monthRange();
-    const dutyDates = (n) => S.range(start, end).filter((d) => S.isDutyNight(state, d) && (state.schedule[d] || []).includes(n)).map((d) => Number(d.slice(8)));
+    const anySingle = p.rows.some((r) => r.singles);
     const rows = p.rows.map((r) => '<tr><td><span class="chip" style="display:inline-block;' + chipStyle(r.name) + '">ครู' + esc(r.name) + '</span> ' + gtag(r.gender) + '</td>' +
-      '<td class="num"><strong>' + r.count + '</strong></td><td class="muted">' + (dutyDates(r.name).join(', ') || '–') + '</td><td class="num">' + money(r.pay) + '</td></tr>').join('');
+      '<td class="num"><strong>' + r.count + '</strong></td>' + (anySingle ? '<td class="num">' + (r.singles || '–') + '</td>' : '') + '<td class="muted">' + (dutyDates(r.name).join(', ') || '–') + '</td><td class="num">' + money(r.pay) + '</td></tr>').join('');
     const totalCount = p.rows.reduce((a, r) => a + r.count, 0);
     return '<div class="card"><h2>ค่าตอบแทนเดือน' + ymLabel(view.ym) + '</h2>' +
       '<div class="row"><label class="f">ยอดจากการเงิน (บาท)<input type="number" step="0.01" min="0" inputmode="decimal" data-payroll="' + view.ym + '" value="' + (state.payroll[view.ym] ?? '') + '" placeholder="เช่น 7000"></label></div>' +
@@ -982,10 +1137,53 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       '<div><span>ต่อ 1 คืน (N = ยอด ÷ จำนวนคืน)</span><b class="big">' + money(p.N) + '</b></div>' +
       '<div><span>ต่อครู 1 คน 1 คืน (X = N ÷ 2)</span><b class="big">' + money(p.X) + '</b></div></div>' +
       (p.pending.length ? '<div class="banner warn"><strong>ยังมี ' + p.pending.length + ' คืนที่ไม่ครบ 2 คน</strong><span class="muted">ยอดรวมที่จ่ายจะน้อยกว่ายอดการเงิน ตรวจที่แท็บตารางเวร</span></div>' : '') +
-      '<div class="tablewrap"><table><thead><tr><th>ครู</th><th class="num">จำนวนเวร</th><th>วันที่ขึ้นเวร</th><th class="num">ค่าตอบแทน (บาท)</th></tr></thead><tbody>' + rows + '</tbody>' +
-      '<tfoot><tr><td>รวม</td><td class="num">' + totalCount + '</td><td></td><td class="num">' + money(p.total) + '</td></tr></tfoot></table></div>' +
-      '<p class="muted">ค่าตอบแทน = X × จำนวนเวรของครู · ไม่ปัดเศษระหว่างคำนวณ แสดงเป็นสตางค์ (ผลรวมที่แสดงรายคนอาจต่างจากยอดรวม ±0.01) · นับเวรตามวันที่เริ่มเวร 18:00 · นับตามครูที่ขึ้นเวรจริงในตารางปัจจุบัน</p>' +
-      '<div class="row noprint"><button class="btn" data-action="export-pay">ส่งออก CSV</button><button class="btn" data-action="print">พิมพ์ / PDF</button></div></div>';
+      '<div class="tablewrap"><table><thead><tr><th>ครู</th><th class="num">จำนวนเวร</th>' + (anySingle ? '<th class="num">เวรเดี่ยว (×2)</th>' : '') + '<th>วันที่ขึ้นเวร</th><th class="num">ค่าตอบแทน (บาท)</th></tr></thead><tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td>รวม</td><td class="num">' + totalCount + '</td>' + (anySingle ? '<td></td>' : '') + '<td></td><td class="num">' + money(p.total) + '</td></tr></tfoot></table></div>' +
+      '<p class="muted">ค่าตอบแทน = X × จำนวนส่วนของครู (เวรปกติ 1 ส่วน เวรเดี่ยว 2 ส่วน) · ไม่ปัดเศษระหว่างคำนวณ แสดงเป็นสตางค์ (ผลรวมที่แสดงรายคนอาจต่างจากยอดรวม ±0.01) · นับเวรตามวันที่เริ่มเวร 18:00 · นับตามครูที่ขึ้นเวรจริงในตารางปัจจุบัน</p>' +
+      '<div class="row noprint"><button class="btn" data-action="export-pay">ส่งออก CSV</button><button class="btn" data-action="print">พิมพ์ / PDF</button></div></div>' +
+      monthCard() + receiptCard(p) + receiptDoc(p);
+  }
+
+  // สถานะเดือน + บันทึกการเปลี่ยนเวรหลังประกาศ + ปิดเดือน
+  const pairText = (ns) => (ns.length ? ns.map((n) => 'ครู' + n).join(' / ') : '(ว่าง)');
+  const changeRows = (list) => list.map((c) => '<tr><td>' + be(c.date) + '</td><td>' + esc(pairText(c.from)) + '</td><td>' + esc(pairText(c.to)) + '</td><td>' + esc(c.reason || '') + '</td><td class="muted">' + dt(c.at) + '</td></tr>').join('');
+  function monthCard() {
+    const mi = monthInfo(view.ym), list = mi.changes || [];
+    const head = mi.closedAt ? '<span class="badge b-ok">ปิดเดือนแล้ว ' + dt(mi.closedAt) + '</span>' : mi.announcedAt ? '<span class="badge b-warn">ประกาศแล้ว ' + dt(mi.announcedAt) + '</span>' : '<span class="badge b-na">ร่าง ยังไม่ประกาศ</span>';
+    return '<div class="card noprint"><h2>สถานะเดือน ' + head + '</h2>' +
+      '<p class="muted">ขั้นตอน: <b>ประกาศตาราง</b> (เก็บสำเนาที่ส่งให้ครู) → ระหว่างเดือนสลับ/แก้ได้ตามจริง ระบบ<b>บันทึกการเปลี่ยนให้อัตโนมัติ</b> → จ่ายเงินแล้ว <b>ปิดเดือน</b> (ล็อกตาราง ใบรับเงินตรงกับที่จ่ายจริง)</p>' +
+      (list.length ? '<div class="tablewrap"><table><thead><tr><th>คืน</th><th>เดิม</th><th>เปลี่ยนเป็น</th><th>เหตุผล</th><th>บันทึกเมื่อ</th></tr></thead><tbody>' + changeRows(list) + '</tbody></table></div>'
+        : mi.announcedAt ? '<p class="muted">ยังไม่มีการเปลี่ยนเวรหลังประกาศ</p>' : '') +
+      '<div class="row" style="margin-top:10px">' + (mi.closedAt ? '<button class="btn" data-action="reopen-month">เปิดเดือนอีกครั้ง</button>'
+        : (mi.announcedAt ? '' : '<button class="btn" data-action="announce">ประกาศตาราง</button>') + '<button class="btn primary" data-action="close-month">ปิดเดือน (จ่ายเงินแล้ว)</button>') + '</div></div>';
+  }
+
+  // ใบลงชื่อรับค่าตอบแทน: หัวหน้าหอรับเงินจากการเงินแล้วโอนให้ครูทีละคน ใบนี้เป็นหลักฐานคุ้มครองผู้จ่าย
+  const receiptRows = (p) => p.rows.filter((r) => r.count > 0);
+  function receiptCard(p) {
+    const rows = receiptRows(p), missing = rows.filter((r) => !(staffOf(r.name) || {}).fullName).map((r) => 'ครู' + r.name);
+    const ready = p.amount !== null && rows.length;
+    return '<div class="card noprint"><h2>ใบลงชื่อรับค่าตอบแทน</h2><p class="muted">พิมพ์ให้ครูแต่ละคนลงชื่อรับเงิน เก็บเป็นหลักฐานของหัวหน้าหอ (รับเงินจากการเงินแล้วโอนให้ครูทีละคน) มีช่องหมายเหตุไว้เขียนวันที่โอน</p>' +
+      '<div class="row"><label class="f">ผู้จ่ายเงิน (หัวหน้าหอ): คำนำหน้า<select data-payer="prefix">' + prefixOptions(state.payer.prefix) + '</select></label>' +
+      '<label class="f grow">ชื่อ-สกุล<input type="text" data-payer="fullName" value="' + esc(state.payer.fullName || '') + '" placeholder="ชื่อ-สกุลจริงของหัวหน้าหอ" autocomplete="off"></label></div>' +
+      (missing.length ? '<div class="banner warn" style="margin-top:12px"><strong>ยังไม่มีชื่อจริง ' + missing.length + ' คน</strong><span>' + esc(missing.join(', ')) + ' · กรอกที่แท็บครู (ถ้าไม่กรอก ใบจะพิมพ์ชื่อเล่น)</span></div>' : '') +
+      (p.amount === null ? '<p class="muted">กรอก "ยอดจากการเงิน" ด้านบนก่อน จึงพิมพ์ใบได้</p>' : !rows.length ? '<p class="muted">เดือนนี้ยังไม่มีครูขึ้นเวร</p>' : '') +
+      '<div class="row" style="margin-top:10px"><button class="btn primary" data-action="print-receipt"' + (ready ? '' : ' disabled') + '>พิมพ์ใบลงชื่อรับเงิน</button></div></div>';
+  }
+  function receiptDoc(p) {
+    if (p.amount === null) return '';
+    const rows = receiptRows(p), totalCount = rows.reduce((a, r) => a + r.count, 0), anySingle = rows.some((r) => r.singles), chg = monthInfo(view.ym).changes || [];
+    const payer = state.payer.fullName ? esc((state.payer.prefix || '') + state.payer.fullName) : '..................................................';
+    return '<section class="receipt"><h1>หลักฐานการจ่ายค่าตอบแทนเวรหอนอน</h1><p class="r-sub">' + esc(state.dormName) + ' · ประจำเดือน' + ymLabel(view.ym) + '</p>' +
+      '<p class="r-info">ได้รับเงินจากการเงิน <b>' + money(p.amount) + '</b> บาท · คืนที่มีเวร ' + p.nights + ' คืน · ต่อคืน ' + money(p.N) + ' บาท · ต่อครู 1 คน 1 คืน ' + money(p.X) + ' บาท</p>' +
+      '<table><thead><tr><th>ที่</th><th>ชื่อ-สกุล</th><th class="num">จำนวนเวร (คืน)</th>' + (anySingle ? '<th class="num">เวรเดี่ยว (×2)</th>' : '') + '<th>วันที่ขึ้นเวร</th><th class="num">จำนวนเงิน (บาท)</th><th>ลงชื่อผู้รับเงิน</th><th>หมายเหตุ (วันที่โอน)</th></tr></thead><tbody>' +
+      rows.map((r, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(S.formalName(staffOf(r.name))) + '</td><td class="num">' + r.count + '</td>' + (anySingle ? '<td class="num">' + (r.singles || '–') + '</td>' : '') + '<td>' + dutyDates(r.name, true).join(', ') + '</td><td class="num">' + money(r.pay) + '</td><td class="sign"></td><td></td></tr>').join('') +
+      '</tbody><tfoot><tr><td></td><td>รวม</td><td class="num">' + totalCount + '</td>' + (anySingle ? '<td></td>' : '') + '<td></td><td class="num">' + money(p.total) + '</td><td colspan="2"></td></tr></tfoot></table>' +
+      '<p class="r-words">รวมเป็นเงิน ' + money(p.total) + ' บาท (' + S.bahtText(p.total) + ')</p>' +
+      (p.pending.length ? '<p class="r-note">หมายเหตุ: มี ' + p.pending.length + ' คืนที่ครูไม่ครบ 2 คน ยอดที่จ่ายรวมจึงน้อยกว่ายอดที่ได้รับ</p>' : '') +
+      '<p class="r-note">วิธีคำนวณ: ต่อคืน = ยอดที่ได้รับ ÷ จำนวนคืนที่มีเวร · ต่อครู 1 คน 1 คืน = ต่อคืน ÷ 2 · ค่าตอบแทน = ต่อครู 1 คน 1 คืน × จำนวนส่วน (เวรปกติ 1 ส่วน เวรเดี่ยว 2 ส่วน) ไม่ปัดเศษระหว่างคำนวณ แสดงถึงสตางค์</p>' +
+      (chg.length ? '<h2 class="r-h2">รายการเปลี่ยนเวรหลังประกาศตาราง (' + chg.length + ' รายการ)</h2><table class="r-chg"><thead><tr><th>คืน</th><th>เดิม</th><th>เปลี่ยนเป็น</th><th>เหตุผล</th><th>บันทึกเมื่อ</th></tr></thead><tbody>' + changeRows(chg) + '</tbody></table>' : '') +
+      '<div class="r-sign"><p>ลงชื่อ ..................................................... ผู้จ่ายเงิน</p><p>(' + payer + ')</p><p>หัวหน้า' + esc(state.dormName) + '</p><p>วันที่ ......... / ......... / .........</p></div></section>';
   }
 
   function dateChips(name) {
@@ -994,13 +1192,36 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       '<div class="row"><label class="f">จากวันที่<input type="date" data-role="from"></label><label class="f">ถึงวันที่ (ถ้าเป็นช่วง)<input type="date" data-role="to"></label>' +
       '<button class="btn" data-action="add-date" data-name="' + esc(name) + '">เพิ่ม</button></div>';
   }
+  function staffCard() {
+    const opt = (v, label, sel) => '<option value="' + v + '"' + (String(v) === String(sel) ? ' selected' : '') + '>' + label + '</option>';
+    const groups = (sel) => [1, 2, 3, 4, 5, 6].map((n) => opt(n, n, sel)).join('');
+    const rows = state.staff.map((s, i) => {
+      const used = S.staffUsage(state, s.name), out = s.active === false;
+      return '<details class="staff-row' + (out ? ' inactive' : '') + '" data-name="' + esc(s.name) + '"' + (view.openStaff === s.name ? ' open' : '') + '><summary class="staff-head"><span class="chip" style="' + chipStyle(s.name) + '">ครู' + esc(s.name) + '</span>' + gtag(s.gender) +
+        '<span class="staff-full">' + (s.fullName ? esc((s.prefix || '') + s.fullName) : '<span class="muted">ยังไม่กรอกชื่อจริง</span>') + '</span>' +
+        (out ? '<span class="badge b-na">ย้ายออกแล้ว</span>' : '') + '<span class="muted staff-n">เวร ' + used + ' คืน</span></summary>' +
+        '<div class="staff-grid"><label class="f">ชื่อเล่น (ใช้ในตาราง)<input type="text" data-staff="name" data-i="' + i + '" value="' + esc(s.name) + '" autocomplete="off"></label>' +
+        '<label class="f">คำนำหน้า<select data-staff="prefix" data-i="' + i + '">' + prefixOptions(s.prefix) + '</select></label>' +
+        '<label class="f wide">ชื่อ-สกุลจริง (ใช้ในใบรับเงิน)<input type="text" data-staff="fullName" data-i="' + i + '" value="' + esc(s.fullName || '') + '" placeholder="เช่น สมชาย ใจดี" autocomplete="off"></label>' +
+        '<label class="f">ชุด<select data-staff="gender" data-i="' + i + '">' + opt('M', 'ชาย (ชช)', s.gender) + opt('F', 'หญิง (ญญ)', s.gender) + '</select></label>' +
+        '<label class="f">เวรกลางวันกลุ่ม<select data-daygroup="' + esc(s.name) + '">' + groups(state.dayGroups.of[s.name]) + '</select></label>' +
+        '<label class="chk"><input type="checkbox" data-staff="active" data-i="' + i + '"' + (out ? '' : ' checked') + '> ยังอยู่เวร</label>' +
+        (used ? '' : '<button class="btn danger" data-action="del-staff" data-i="' + i + '">ลบครูคนนี้</button>') + '</div></details>';
+    }).join('');
+    return '<div class="card"><h2>รายชื่อครู (' + S.activeStaff(state).length + ' คนที่อยู่เวร)</h2>' +
+      '<p class="muted">ชื่อจริงเก็บเฉพาะในเครื่องนี้ ไฟล์สำรอง และ repo ข้อมูลส่วนตัว (ถ้าเปิดซิงก์) <strong>ไม่อยู่ในตัวแอปที่เผยแพร่</strong> · ครูย้ายออก: เอาเครื่องหมาย "ยังอยู่เวร" ออก (ตารางและค่าตอบแทนเดือนเก่ายังอยู่) · ลบได้เฉพาะครูที่ยังไม่เคยขึ้นเวร · เปลี่ยนชื่อเล่นแล้วตารางเดิมเปลี่ยนตามให้ · <strong>แตะชื่อครูเพื่อแก้ไข</strong></p>' +
+      (rows || '<div class="banner warn"><strong>ยังไม่มีรายชื่อครู</strong><span>เพิ่มด้านล่าง หรือนำเข้าไฟล์สำรอง/ดึงจาก GitHub ที่แท็บตั้งค่า</span></div>') +
+      '<div class="staff-add"><h3>เพิ่มครู</h3><div class="row"><label class="f">ชื่อเล่น<input type="text" id="nsName" autocomplete="off"></label>' +
+      '<label class="f">ชุด<select id="nsGender">' + opt('M', 'ชาย (ชช)', '') + opt('F', 'หญิง (ญญ)', '') + '</select></label>' +
+      '<label class="f">เวรกลางวันกลุ่ม<select id="nsGroup">' + groups(1) + '</select></label><button class="btn primary" data-action="add-staff">+ เพิ่มครู</button></div></div></div>';
+  }
   function renderPeople() {
     const risk = S.capacityWarnings(state, view.ym);
-    return '<div class="card"><h2>ผลกระทบของวันไม่ว่าง · ' + ymLabel(view.ym) + '</h2>' +
+    return staffCard() + '<div class="card"><h2>ผลกระทบของวันไม่ว่าง · ' + ymLabel(view.ym) + '</h2>' +
       (risk.length ? '<ul class="issues">' + risk.map((r) => '<li class="' + (r.level === 'error' ? 'error' : 'warn') + '"><span class="rule">' + (r.level === 'error' ? '✖' : '⚠') + '</span><span><strong>' + be(r.date) + '</strong> · ' + esc(r.msg) + '</span></li>').join('') + '</ul>'
         : '<p class="muted" style="margin:0">ยังไม่พบคืนที่ครูไม่ว่างจนชุดเหลือน้อยกว่า 3 คน (ระบบเตือนทันทีที่เพิ่มวันไม่ว่าง) คืนที่เหลือไม่ถึง 2 คนจะเป็น "รอหัวหน้าหอ" ให้คุณพิจารณาเอง</p>') + '</div>' +
       '<div class="card"><h2>ครูและวันที่ไม่ว่าง (ภารกิจ / ธุระ)</h2><p class="muted">ครูแจ้งมา หัวหน้าหอกรอกที่นี่ ไม่ต้องมีใบ เก็บเท่าที่จำเป็น</p>' +
-      state.staff.map((s) => '<div class="person"><h3><span class="chip" style="' + chipStyle(s.name) + '">ครู' + esc(s.name) + '</span>' + gtag(s.gender) + '<span class="muted">เวรกลางวันกลุ่ม ' + (state.dayGroups.of[s.name] || '–') + '</span></h3>' + dateChips(s.name) + '</div>').join('') + '</div>';
+      S.activeStaff(state).map((s) => '<div class="person"><h3><span class="chip" style="' + chipStyle(s.name) + '">ครู' + esc(s.name) + '</span>' + gtag(s.gender) + '<span class="muted">เวรกลางวันกลุ่ม ' + (state.dayGroups.of[s.name] || '–') + '</span></h3>' + dateChips(s.name) + '</div>').join('') + '</div>';
   }
 
   function renderSettings() {
@@ -1019,8 +1240,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       '<div class="row" style="margin-top:8px"><button class="btn" data-action="add-anchor">+ เพิ่มจุดตั้งต้นใหม่</button></div>' +
       '<p class="muted">จุดตั้งต้น = ตั้งแต่วันที่ระบุ กลุ่มของวันนั้นเป็นเลขนี้ แล้วหมุน 1–6 ทุกวัน จนถึงจุดถัดไป <strong>เมื่อตารางเวรกลางวันถูกตั้งต้นใหม่ ให้ "เพิ่มจุดใหม่" อย่าแก้จุดเก่า</strong> เดือนที่ผ่านมาจะได้ไม่เปลี่ยน (การแก้จุดเก่ากระทบการตรวจย้อนหลัง)</p>' +
       '<p class="muted">ตรวจ 7 วันจากจุดล่าสุด: ' + preview + '</p>' +
-      '<div class="tablewrap"><table><thead><tr><th>ครู</th><th>ชุด</th><th>เวรกลางวันกลุ่ม</th></tr></thead><tbody>' +
-      state.staff.map((s) => '<tr><td>ครู' + esc(s.name) + '</td><td>' + gtag(s.gender) + '</td><td><select data-daygroup="' + esc(s.name) + '">' + [1, 2, 3, 4, 5, 6].map((n) => opt(n, dg.of[s.name])).join('') + '</select></td></tr>').join('') + '</tbody></table></div></div>' +
+      '<p class="muted" style="margin-bottom:0">กลุ่มเวรกลางวันของครูแต่ละคน แก้ที่แท็บ <strong>ครู</strong></p></div>' +
       '<div class="card"><h2>ช่วงงดเวร (เช่น ปิดเทอม)</h2>' +
       '<div class="chips-inline">' + (state.noDuty.length ? state.noDuty.map((r, i) => '<span class="tag">' + be(r.from) + ' – ' + be(r.to) + '<button data-action="del-noduty" data-i="' + i + '" aria-label="ลบ">×</button></span>').join('') : '<span class="muted">ไม่มี</span>') + '</div>' +
       '<div class="row"><label class="f">จากวันที่<input type="date" id="ndFrom"></label><label class="f">ถึงวันที่<input type="date" id="ndTo"></label><button class="btn" data-action="add-noduty">เพิ่ม</button></div></div>' +
@@ -1183,9 +1403,10 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     return list.length ? list.map((i) => '<div class="' + i.level + '"><strong>' + be(i.date) + '</strong> ' + i.rule + ': ' + esc(i.msg) + '</div>').join('') : '<div class="okmsg">ผ่านเงื่อนไขพื้นฐาน</div>';
   }
   function openDay(date) {
+    if (isClosed(date)) { toast('เดือนนี้ปิดแล้ว แก้ตารางไม่ได้ (เปิดเดือนอีกครั้งที่แท็บสรุป)'); return; }
     const ns = state.schedule[date] || [];
     const exp = S.explainNight(state, date);
-    const order = state.staff.slice().sort((a, b) => (b.gender === exp.gender) - (a.gender === exp.gender));
+    const order = state.staff.filter((s) => s.active !== false || ns.includes(s.name)).sort((a, b) => (b.gender === exp.gender) - (a.gender === exp.gender));
     dlg().innerHTML = '<form method="dialog" data-form="day" data-date="' + date + '"><h3>คืนวัน' + S.THAI_DOW[S.dow(date)] + 'ที่ ' + be(date) + '</h3>' +
       '<p class="muted" style="margin:0">เวร 18:00 – 07:00 น. · เวรกลางวันวันนี้กลุ่ม ' + S.dayGroup(state, date) + ' · ชุดที่ควรเป็น ' + gtag(exp.gender) + '</p>' +
       '<div class="pick">' + order.map((s) => {
@@ -1195,7 +1416,9 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
         if ((state.schedule[S.addDays(date, 1)] || []).includes(s.name)) hints.push('เวรพรุ่งนี้');
         return '<label class="' + (s.gender === exp.gender ? '' : 'dim') + '"><input type="checkbox" name="n" value="' + esc(s.name) + '"' + (ns.includes(s.name) ? ' checked' : '') + '><span class="sw" style="background:' + color(s.name) + '"></span>ครู' + esc(s.name) + ' ' + gtag(s.gender) + (hints.length ? '<span class="hint">' + hints.join(' · ') + '</span>' : '') + '</label>';
       }).join('') + '</div><div class="preview" id="dlgPreview"></div>' +
-      '<label><input type="checkbox" name="lock"' + (state.locked[date] ? ' checked' : '') + '> 🔒 ล็อกคืนนี้ (ตัวสร้างอัตโนมัติจะไม่แก้)</label>' +
+      '<label class="chk"><input type="checkbox" name="lock"' + (state.locked[date] ? ' checked' : '') + '> 🔒 ล็อกคืนนี้ (ตัวสร้างอัตโนมัติจะไม่แก้)</label>' +
+      '<label class="chk"><input type="checkbox" name="single"' + ((state.single || {})[date] ? ' checked' : '') + '> เวรเดี่ยว (นักเรียนไม่ถึงเกณฑ์ ครูอยู่คนเดียว ได้ค่าตอบแทน 2 ส่วน)</label>' +
+      (isAnnounced(date) ? '<label class="f" style="margin-top:6px">เหตุผลที่เปลี่ยน (ไม่บังคับ บันทึกไว้ในรายการเปลี่ยนเวร)<input type="text" name="reason" placeholder="เช่น ติดราชการ แลกกับครู…" autocomplete="off"></label>' : '') +
       '<div class="actions"><button class="btn danger" type="button" data-action="day-clear" data-date="' + date + '">ล้างคืนนี้</button><button class="btn" type="button" data-action="dlg-cancel">ยกเลิก</button><button class="btn primary" type="submit" data-action="day-save">ตกลง</button></div></form>';
     dlg().showModal();
     refreshDayPreview();
@@ -1204,7 +1427,8 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   function refreshDayPreview() {
     const f = $('#dlg form[data-form=day]'); if (!f) return;
     const d = f.dataset.date;
-    const tmp = Object.assign({}, state, { schedule: Object.assign({}, state.schedule, { [d]: state.staff.map((s) => s.name).filter((n) => pickedNames(f).includes(n)) }) });
+    const tmp = Object.assign({}, state, { schedule: Object.assign({}, state.schedule, { [d]: state.staff.map((s) => s.name).filter((n) => pickedNames(f).includes(n)) }),
+      single: Object.assign({}, state.single, { [d]: f.querySelector('input[name=single]').checked }) });
     if (!tmp.schedule[d].length) delete tmp.schedule[d];
     $('#dlgPreview').innerHTML = previewHtml(tmp, S.addDays(d, -1), S.addDays(d, 1));
   }
@@ -1224,13 +1448,15 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
   }
 
   function openSwap() {
+    if (isClosed(view.ym)) { toast('เดือน' + ymLabel(view.ym) + ' ปิดแล้ว แก้ตารางไม่ได้ (เปิดเดือนอีกครั้งที่แท็บสรุป)'); return; }
     const { start, end } = monthRange();
     const ds = S.range(start, end).filter((d) => (state.schedule[d] || []).length);
     if (ds.length < 2) { toast('ต้องมีตารางอย่างน้อย 2 คืนในเดือนนี้'); return; }
     dlg().innerHTML = '<form method="dialog" data-form="swap"><h3>สลับครูระหว่างสองคืน</h3><p class="muted" style="margin:0">เลือกครู 1 คนจากแต่ละคืน แล้วสลับที่กัน ระบบตรวจเงื่อนไขให้ก่อน คุณเป็นผู้ตัดสินใจ</p>' +
       '<div class="stack" style="margin-top:10px"><div class="row"><label class="f">คืนที่ 1<select id="swDa">' + nightOptions(ds[0]) + '</select></label><label class="f">ครู<select id="swNa">' + personOptions(ds[0]) + '</select></label></div>' +
       '<div class="row"><label class="f">คืนที่ 2<select id="swDb">' + nightOptions(ds[1]) + '</select></label><label class="f">ครู<select id="swNb">' + personOptions(ds[1]) + '</select></label></div></div>' +
-      '<div class="preview" id="swPreview"></div><div class="actions"><button class="btn" type="button" data-action="dlg-cancel">ยกเลิก</button><button class="btn primary" type="submit" data-action="swap-do">สลับ</button></div></form>';
+      '<div class="preview" id="swPreview"></div>' + (isAnnounced(view.ym) ? '<label class="f">เหตุผลที่สลับ (ไม่บังคับ)<input type="text" id="swReason" autocomplete="off"></label>' : '') +
+      '<div class="actions"><button class="btn" type="button" data-action="dlg-cancel">ยกเลิก</button><button class="btn primary" type="submit" data-action="swap-do">สลับ</button></div></form>';
     dlg().showModal();
     refreshSwapPreview();
   }
@@ -1276,12 +1502,15 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
         break;
       case 'edit': openDay(el.dataset.date); break;
       case 'dlg-cancel': dlg().close(); break;
-      case 'day-clear': delete state.schedule[el.dataset.date]; delete state.locked[el.dataset.date]; dlg().close(); commit(); break;
+      case 'day-clear': { const rs = $('#dlg input[name=reason]'); pendingReason = rs ? rs.value.trim() : ''; delete state.schedule[el.dataset.date]; delete state.locked[el.dataset.date]; delete state.single[el.dataset.date]; dlg().close(); commit(); break; }
       case 'day-save': {
         ev.preventDefault();
-        const f = $('#dlg form'), date = f.dataset.date, picked = pickedNames(f);
+        const f = $('#dlg form'), date = f.dataset.date, picked = pickedNames(f), single = f.querySelector('input[name=single]').checked;
+        if (single && picked.length !== 1) { toast('เวรเดี่ยวต้องเลือกครู 1 คน'); break; }
         if (picked.length) state.schedule[date] = state.staff.map((s) => s.name).filter((n) => picked.includes(n)); else delete state.schedule[date];
         if (f.querySelector('input[name=lock]').checked) state.locked[date] = true; else delete state.locked[date];
+        if (single) state.single[date] = true; else delete state.single[date];
+        const rs = f.querySelector('input[name=reason]'); pendingReason = rs ? rs.value.trim() : '';
         dlg().close(); commit(); break;
       }
       case 'swap-open': openSwap(); break;
@@ -1290,12 +1519,15 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
         const { a: sa, b: sb } = swapSel(), r = S.swapTeachers(state, sa, sb);
         if (!r.ok) { toast(r.error); break; }
         if (refreshSwapPreview() && !confirm('การสลับนี้ทำให้ไม่ตรงเงื่อนไขพื้นฐาน ยืนยันสลับต่อหรือไม่?')) break;
+        pendingReason = $('#swReason') ? $('#swReason').value.trim() : '';
         state.schedule = r.schedule; dlg().close(); commit(); toast('สลับครูแล้ว'); break;
       }
       case 'generate': {
+        if (isClosed(view.ym)) { toast('เดือน' + ymLabel(view.ym) + ' ปิดแล้ว แก้ตารางไม่ได้ (เปิดเดือนอีกครั้งที่แท็บสรุป)'); break; }
         const { start, end } = monthRange();
         const hasData = S.range(start, end).some((d) => !state.locked[d] && (state.schedule[d] || []).length && S.isDutyNight(state, d));
-        if (hasData && !confirm('การสร้างใหม่จะแทนที่ทุกคืนที่ไม่ได้ล็อกในเดือนนี้ ดำเนินการต่อหรือไม่?')) break;
+        if (hasData && !confirm('การสร้างใหม่จะแทนที่ทุกคืนที่ไม่ได้ล็อกในเดือนนี้' + (isAnnounced(view.ym) ? ' (ประกาศไปแล้ว ทุกคืนที่เปลี่ยนจะถูกบันทึกในรายการเปลี่ยนเวร)' : '') + ' ดำเนินการต่อหรือไม่?')) break;
+        pendingReason = 'สร้างตารางใหม่';
         view.seed++;
         const r = S.generate(state, view.ym, { seed: view.seed === 1 ? undefined : view.seed });
         state.schedule = r.schedule; commit();
@@ -1303,9 +1535,42 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
         break;
       }
       case 'clear':
-        if (confirm('ล้างทุกคืนที่ไม่ได้ล็อกในเดือนนี้หรือไม่?')) { const { start, end } = monthRange(); S.range(start, end).forEach((d) => { if (!state.locked[d]) delete state.schedule[d]; }); commit(); }
+        if (isClosed(view.ym)) { toast('เดือน' + ymLabel(view.ym) + ' ปิดแล้ว แก้ตารางไม่ได้ (เปิดเดือนอีกครั้งที่แท็บสรุป)'); break; }
+        if (confirm('ล้างทุกคืนที่ไม่ได้ล็อกในเดือนนี้หรือไม่? (คืนที่ล็อกและเวรเดี่ยวไม่ถูกล้าง)')) { const { start, end } = monthRange(); pendingReason = 'ล้างคืนที่ไม่ล็อก'; S.range(start, end).forEach((d) => { if (!state.locked[d] && !state.single[d]) delete state.schedule[d]; }); commit(); }
         break;
-      case 'print': window.print(); break;
+      case 'announce': {
+        const { start, end } = monthRange(), errs = S.validate(state, start, end).filter((i) => i.level === 'error').length;
+        const empty = S.range(start, end).filter((d) => S.isDutyNight(state, d) && !(state.schedule[d] || []).length).length;
+        if (!confirm('ประกาศตาราง' + ymLabel(view.ym) + '?\nระบบจะเก็บสำเนาตารางตอนนี้ และบันทึกทุกการเปลี่ยนเวรหลังจากนี้' + (errs ? '\n⚠ ยังมีรายการผิดเงื่อนไข ' + errs + ' รายการ' : '') + (empty ? '\n⚠ ยังไม่มีครู ' + empty + ' คืน' : ''))) break;
+        const ann = {}; S.range(start, end).forEach((d) => { if ((state.schedule[d] || []).length) ann[d] = state.schedule[d].slice(); });
+        state.months[view.ym] = Object.assign({}, monthInfo(view.ym), { announcedAt: new Date().toISOString(), announced: ann });
+        state.months[view.ym].changes = state.months[view.ym].changes || [];
+        commit(); toast('ประกาศแล้ว อย่าลืมกด "บันทึก" แล้วส่งตารางให้ครู'); break;
+      }
+      case 'close-month': {
+        const p = S.payroll(state, view.ym);
+        if (!confirm('ปิดเดือน' + ymLabel(view.ym) + ' (จ่ายเงินแล้ว)?\nตารางเดือนนี้จะแก้ไม่ได้ จนกว่าจะกด "เปิดเดือนอีกครั้ง"' + (p.amount === null ? '\n⚠ ยังไม่ได้กรอกยอดจากการเงิน' : '') + (p.pending.length ? '\n⚠ ยังมี ' + p.pending.length + ' คืนที่ครูไม่ครบ' : ''))) break;
+        state.months[view.ym] = Object.assign({}, monthInfo(view.ym), { closedAt: new Date().toISOString() });
+        commit(); toast('ปิดเดือนแล้ว อย่าลืมกด "บันทึก"'); break;
+      }
+      case 'reopen-month':
+        if (!confirm('เปิดเดือน' + ymLabel(view.ym) + 'อีกครั้ง? แก้ตารางได้ และถ้าประกาศแล้ว การเปลี่ยนจะถูกบันทึกต่อ (ระวังยอดไม่ตรงกับที่จ่ายไปแล้ว)')) break;
+        delete state.months[view.ym].closedAt; commit(); break;
+      case 'print': document.body.classList.remove('print-receipt'); window.print(); break;
+      case 'print-receipt': render(); document.body.classList.add('print-receipt'); window.print(); break;
+      case 'add-staff': {
+        const nm = $('#nsName').value.trim(), g = $('#nsGender').value, grp = Number($('#nsGroup').value);
+        if (!nm) { toast('กรอกชื่อเล่นก่อน'); break; }
+        if (state.staff.some((s) => s.name === nm)) { toast('มีครูชื่อ "' + nm + '" อยู่แล้ว'); break; }
+        state.staff.push({ name: nm, gender: g, prefix: '', fullName: '', active: true });
+        state.dayGroups.of[nm] = grp; view.openStaff = nm; commit(); toast('เพิ่มครู' + nm + 'แล้ว (ยังไม่ได้บันทึก)'); break;
+      }
+      case 'del-staff': {
+        const s = state.staff[Number(el.dataset.i)];
+        if (!s || S.staffUsage(state, s.name)) break;
+        if (!confirm('ลบครู' + s.name + ' ออกจากรายชื่อหรือไม่?')) break;
+        state.staff.splice(Number(el.dataset.i), 1); delete state.dayGroups.of[s.name]; delete state.unavailable[s.name]; commit(); break;
+      }
       case 'export-csv': {
         const { start, end } = monthRange();
         const rows = [['วันที่', 'วัน', 'เวรกลางวันกลุ่ม', 'ชุด', 'ครูคนที่ 1', 'ครูคนที่ 2']].concat(S.range(start, end).filter((d) => S.isDutyNight(state, d)).map((d) => {
@@ -1316,9 +1581,9 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       }
       case 'export-pay': {
         const p = S.payroll(state, view.ym);
-        const rows = [['ครู', 'ชุด', 'จำนวนเวร', 'ค่าตอบแทน (บาท)']].concat(p.rows.map((r) => ['ครู' + r.name, S.GENDER_LABEL[r.gender], r.count, r.pay === null ? '' : r.pay.toFixed(2)]));
-        rows.push(['รวม', '', p.rows.reduce((a, r) => a + r.count, 0), p.total === null ? '' : p.total.toFixed(2)]);
-        rows.push(['ยอดการเงิน', '', 'จำนวนคืน ' + p.nights, p.amount === null ? '' : p.amount]);
+        const rows = [['ครู', 'ชุด', 'จำนวนเวร', 'เวรเดี่ยว (×2)', 'จำนวนส่วน', 'ค่าตอบแทน (บาท)']].concat(p.rows.map((r) => ['ครู' + r.name, S.GENDER_LABEL[r.gender], r.count, r.singles, r.shares, r.pay === null ? '' : r.pay.toFixed(2)]));
+        rows.push(['รวม', '', p.rows.reduce((a, r) => a + r.count, 0), p.rows.reduce((a, r) => a + r.singles, 0), p.rows.reduce((a, r) => a + r.shares, 0), p.total === null ? '' : p.total.toFixed(2)]);
+        rows.push(['ยอดการเงิน', '', 'จำนวนคืน ' + p.nights, '', '', p.amount === null ? '' : p.amount]);
         download('sod-payroll-' + view.ym + '.csv', csv(rows), 'text/csv;charset=utf-8'); break;
       }
       case 'export-json': {
@@ -1385,7 +1650,7 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
 
   document.addEventListener('change', (ev) => {
     const t = ev.target;
-    if (t.closest && t.closest('form[data-form=day]') && t.name === 'n') { refreshDayPreview(); return; }
+    if (t.closest && t.closest('form[data-form=day]') && (t.name === 'n' || t.name === 'single')) { refreshDayPreview(); return; }
     if (t.closest && t.closest('form[data-form=swap]')) {
       if (t.id === 'swDa') $('#swNa').innerHTML = personOptions(t.value);
       if (t.id === 'swDb') $('#swNb').innerHTML = personOptions(t.value);
@@ -1396,7 +1661,23 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
       const k = t.dataset.set;
       state[k] = t.value;
       commit();
-    } else if (t.dataset.daygroup) { state.dayGroups.of[t.dataset.daygroup] = Number(t.value); commit(); }
+    }
+    else if (t.dataset.staff) {
+      const s = state.staff[Number(t.dataset.i)], f = t.dataset.staff;
+      if (!s) return;
+      if (f === 'name') {
+        const r = S.renameStaff(state, s.name, t.value);
+        if (!r.ok) { toast(r.error); render(); return; }
+        if (view.openStaff === s.name) view.openStaff = r.state.staff[Number(t.dataset.i)].name;
+        state = r.state; commit();
+      } else if (f === 'gender') {
+        if (S.staffUsage(state, s.name) && !confirm('ครู' + s.name + ' มีตารางเวรอยู่แล้ว การเปลี่ยนชุดจะทำให้ตรวจตารางเดิมใหม่ (อาจขึ้นว่าผิดเงื่อนไข) ต้องการเปลี่ยนไหม?')) { render(); return; }
+        s.gender = t.value; commit();
+      } else if (f === 'active') { s.active = t.checked; commit(); }
+      else { s[f] = t.value.trim(); commitSoft(); }
+    }
+    else if (t.dataset.payer) { state.payer[t.dataset.payer] = t.value.trim(); commitSoft(); }
+    else if (t.dataset.daygroup) { state.dayGroups.of[t.dataset.daygroup] = Number(t.value); commit(); }
     else if (t.dataset.anchor !== undefined) {
       const list = state.dayGroups.anchors, a = list[Number(t.dataset.anchor)], f = t.dataset.field;
       if (!a) return;
@@ -1425,6 +1706,13 @@ dialog::backdrop { background: rgba(11, 31, 25, .5); }
     }
   });
 
+  // จำว่าเปิดแถบครูคนไหนไว้ เพื่อไม่ให้พับเองหลังแก้ค่า
+  document.addEventListener('toggle', (ev) => {
+    const d = ev.target;
+    if (!d.matches || !d.matches('details.staff-row')) return;
+    if (d.open) view.openStaff = d.dataset.name; else if (view.openStaff === d.dataset.name) view.openStaff = null;
+  }, true);
+  window.addEventListener('afterprint', () => document.body.classList.remove('print-receipt'));
   dlg().addEventListener('click', (ev) => { if (ev.target === ev.currentTarget) ev.currentTarget.close(); });
   // จุดบอกตำแหน่งของการ์ดเด่นตามการเลื่อน
   document.addEventListener('scroll', (ev) => {
