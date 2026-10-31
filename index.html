@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.7.2) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.7.3) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -397,23 +397,10 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 
 /* คู่มือการใช้งาน (guide.js) */
 .guide-btn { font-size: 1.15rem; margin-right: 8px; }
-.guide-toc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.guide-toc a { padding: 6px 12px; border-radius: 999px; background: var(--sheet); border: 1px solid var(--line-soft); color: inherit; text-decoration: none; font-size: .9rem; }
-.guide { line-height: 1.7; }
-.guide h1 { font-size: 1.25rem; margin: 0 0 8px; }
-.guide h2 { font-size: 1.1rem; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--line-soft); scroll-margin-top: 90px; }
-.guide h2:first-of-type { margin-top: 8px; }
-.guide h3 { font-size: 1rem; margin: 14px 0 4px; }
-.guide ul, .guide ol { padding-left: 1.3em; margin: 6px 0; }
-.guide li { margin: 3px 0; }
-.guide table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .92rem; }
-.guide th, .guide td { border: 1px solid var(--line-soft); padding: 6px 8px; text-align: left; vertical-align: top; }
-.guide th { background: var(--sheet); }
+.guide.gdoc { padding: 20px 18px; }
 @media print {
   body.print-guide .top, body.print-guide #app > * { display: none !important; }
-  body.print-guide #app > .guide { display: block !important; box-shadow: none; border: 0; padding: 0; color: #000; font-size: 11pt; }
-  body.print-guide .guide th, body.print-guide .guide td { border-color: #000; color: #000; }
-  body.print-guide .guide-teacher { break-before: page; page-break-before: always; }
+  body.print-guide #app > .guide { display: block !important; box-shadow: none; border: 0; padding: 0; background: #fff; }
 }
 </style>
 </head>
@@ -437,7 +424,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.7.2';
+  const VERSION = '1.7.3';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -1094,153 +1081,260 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 <script>
 // คู่มือการใช้งานในแอป (แสดงในหน้า "คู่มือ" พิมพ์/PDF และดาวน์โหลดเป็นไฟล์ได้)
 // ไฟล์นี้เผยแพร่สาธารณะพร้อมตัวแอป ห้ามใส่ชื่อครูหรือข้อมูลจริง · แก้เนื้อหาแล้วรัน npm run build
+// 1.7.3: หน้าตาออกแบบใหม่จากแบบที่ผู้ใช้ให้ Gemini ทำ (เนื้อหาเดิมทุกคำ) · css ใช้ร่วมกันทั้งในแอปและไฟล์ที่ดาวน์โหลด (ขอบเขต .gdoc)
 (function (root) {
   'use strict';
   const head = `
-<h2 id="g-start">1. ระบบนี้ทำอะไร</h2>
-<p>ใช้จัด<b>ตารางเวรหอนอน</b> (18:00–07:00 น. ของวันถัดไป) รายเดือน ตรวจกติกาให้อัตโนมัติ นับเวรสะสมให้เป็นธรรม คำนวณค่าตอบแทน พิมพ์ใบลงชื่อรับเงิน และส่งตารางเข้า LINE</p>
-<ul>
-<li>ผู้ใช้คือ<b>หัวหน้าหอคนเดียว</b> ครูไม่ต้องเปิดแอปนี้ (ครูดูตารางจากรูปที่ส่งใน LINE หรือกระดาษ)</li>
-<li>ไม่มีบัญชีผู้ใช้ ไม่มีเซิร์ฟเวอร์ <b>ข้อมูลอยู่ในเครื่องที่ใช้</b> (และใน GitHub ถ้าเปิดซิงก์) จึงต้องกด <b>บันทึก</b> และ<b>สำรองข้อมูล</b>เสมอ (หัวข้อ 7)</li>
-<li>ระบบ<b>ไม่ห้าม</b>การตัดสินใจของหัวหน้าหอ แค่แสดงสีแดง/เหลืองให้เห็น หัวหน้าหอเป็นผู้ตัดสินใจเสมอ</li>
-</ul>
+<section class="section-block">
+  <h2 id="g-start">1. ระบบนี้ทำอะไร</h2>
+  <p>ใช้จัด<b>ตารางเวรหอนอน</b> (18:00–07:00 น. ของวันถัดไป) รายเดือน ตรวจกติกาให้อัตโนมัติ นับเวรสะสมให้เป็นธรรม คำนวณค่าตอบแทน พิมพ์ใบลงชื่อรับเงิน และส่งตารางเข้า LINE</p>
+  <ul>
+    <li>ผู้ใช้คือ<b>หัวหน้าหอคนเดียว</b> ครูไม่ต้องเปิดแอปนี้ (ครูดูตารางจากรูปที่ส่งใน LINE หรือกระดาษ)</li>
+    <li>ไม่มีบัญชีผู้ใช้ ไม่มีเซิร์ฟเวอร์ <b>ข้อมูลอยู่ในเครื่องที่ใช้</b> (และใน <span class="tech-pill">GitHub</span> ถ้าเปิดซิงก์) จึงต้องกด <b>บันทึก</b> และ<b>สำรองข้อมูล</b>เสมอ (หัวข้อ 7)</li>
+    <li>ระบบ<b>ไม่ห้าม</b>การตัดสินใจของหัวหน้าหอ แค่แสดงสีแดง/เหลืองให้เห็น หัวหน้าหอเป็นผู้ตัดสินใจเสมอ</li>
+  </ul>
+</section>
 
-<h2 id="g-first">2. เริ่มใช้ครั้งแรก / หัวหน้าหอคนใหม่</h2>
-<ol>
-<li>เปิดลิงก์แอปใน <b>Safari</b> บน iPhone แล้วกด <b>แชร์ → เพิ่มไปยังหน้าจอโฮม</b> จะได้ไอคอนแอป</li>
-<li><b>นำข้อมูลเดิมเข้า</b> (ถ้ามี): แท็บ <b>ตั้งค่า</b> → นำเข้าไฟล์สำรอง (.json) หรือ ซิงก์ GitHub → ดึงข้อมูล</li>
-<li>แท็บ <b>ครู</b>: เพิ่ม/แก้ครู (ชื่อเล่น คำนำหน้า ชื่อ-สกุลจริง ชุดชาย/หญิง กลุ่มเวรกลางวัน) · ครูย้ายออก ให้เอาเครื่องหมาย "ยังอยู่เวร" ออก (ประวัติเดิมยังอยู่)</li>
-<li>แท็บ <b>ตั้งค่า</b>:
- <ul>
- <li><b>เทอม</b>: คืนเวรแรก–คืนเวรสุดท้าย และวันที่เวรกลางวันเริ่ม + กลุ่มของวันนั้น (นอกเทอม = ไม่มีเวรนอน · เวรสะสมนับใหม่ทุกเทอม)</li>
- <li><b>วันหยุดนักขัตฤกษ์</b>: วันที่ตายตัวมีให้แล้ว <b>วันพระ วันหยุดชดเชย ต้องเพิ่มเอง</b> ทุกปี (มีผลกับเงินตามระเบียบและความเป็นธรรมเวรวันหยุด)</li>
- <li><b>ช่วงงดเวร</b>: ช่วงที่ไม่มีเวรนอนกลางเทอม (ถ้ามี)</li>
- </ul></li>
-<li>แท็บ <b>สรุป</b>: กรอกชื่อ-สกุลผู้จ่ายเงิน (หัวหน้าหอ) สำหรับใบลงชื่อรับเงิน</li>
-</ol>
+<section class="section-block">
+  <h2 id="g-first">2. เริ่มใช้ครั้งแรก / หัวหน้าหอคนใหม่</h2>
+  <ol>
+    <li>เปิดลิงก์แอปใน <b><span class="tech-pill">Safari</span></b> บน <span class="tech-pill">iPhone</span> แล้วกด <b>แชร์ → เพิ่มไปยังหน้าจอโฮม</b> จะได้ไอคอนแอป</li>
+    <li><b>นำข้อมูลเดิมเข้า</b> (ถ้ามี): แท็บ <b>ตั้งค่า</b> → นำเข้าไฟล์สำรอง (<span class="tech-pill">.json</span>) หรือ ซิงก์ <span class="tech-pill">GitHub</span> → ดึงข้อมูล</li>
+    <li>แท็บ <b>ครู</b>: เพิ่ม/แก้ครู (ชื่อเล่น คำนำหน้า ชื่อ-สกุลจริง ชุดชาย/หญิง กลุ่มเวรกลางวัน) · ครูย้ายออก ให้เอาเครื่องหมาย "ยังอยู่เวร" ออก (ประวัติเดิมยังอยู่)</li>
+    <li>แท็บ <b>ตั้งค่า</b>:
+      <ul>
+        <li><b>เทอม</b>: คืนเวรแรก–คืนเวรสุดท้าย และวันที่เวรกลางวันเริ่ม + กลุ่มของวันนั้น (นอกเทอม = ไม่มีเวรนอน · เวรสะสมนับใหม่ทุกเทอม)</li>
+        <li><b>วันหยุดนักขัตฤกษ์</b>: วันที่ตายตัวมีให้แล้ว <b>วันพระ วันหยุดชดเชย ต้องเพิ่มเอง</b> ทุกปี (มีผลกับเงินตามระเบียบและความเป็นธรรมเวรวันหยุด)</li>
+        <li><b>ช่วงงดเวร</b>: ช่วงที่ไม่มีเวรนอนกลางเทอม (ถ้ามี)</li>
+      </ul>
+    </li>
+    <li>แท็บ <b>สรุป</b>: กรอกชื่อ-สกุลผู้จ่ายเงิน (หัวหน้าหอ) สำหรับใบลงชื่อรับเงิน</li>
+  </ol>
+</section>
 
-<h2 id="g-month">3. งานประจำเดือน (เช็กลิสต์)</h2>
-<h3>ก่อนเดือนเริ่ม</h3>
-<ol>
-<li>แท็บ <b>ครู</b>: กรอก<b>วันไม่ว่าง</b> (ห้ามจัด) และ<b>คืนกลับจากราชการ</b> (ควรได้พัก ระบบเลี่ยงให้ก่อน) ดู "ผลกระทบ" ถ้าขึ้น ✖ แปลว่าคืนนั้นจัดไม่ได้ ต้องพิจารณาเอง</li>
-<li><b>จัดเดือนก่อนหน้าให้เสร็จก่อน</b> (เพื่อต่อชุดชาย/หญิงข้ามเดือนให้ถูก)</li>
-<li>แท็บ <b>ตาราง</b> → ปุ่ม <b>สร้างตาราง</b> (กดซ้ำ = ลองแบบอื่น) · คืนที่ล็อก 🔒 เวรเดี่ยว และคืนที่ยืนยันแล้ว ✔ จะไม่ถูกเปลี่ยน</li>
-<li>คืนที่ขึ้น "รอหัวหน้าหอ" หรือสีแดง → แตะคืนนั้นเพื่อเลือกครูเอง · ใช้ <b>สลับครู</b> เพื่อแลกครูระหว่าง 2 คืน</li>
-<li>กด <b>บันทึก</b></li>
-<li>กด <b>ประกาศตาราง</b> (ระบบเก็บสำเนาตารางที่ส่งให้ครู) แล้วกด <b>บันทึก</b> อีกครั้ง</li>
-<li>ปุ่ม <b>ส่ง LINE</b> → ตรวจรูปและข้อความ → <b>แชร์รูป + ข้อความ</b> → เลือกกลุ่ม LINE แล้วกดส่งเอง</li>
-</ol>
-<h3>ระหว่างเดือน</h3>
-<ol>
-<li>มีการเปลี่ยนเวร/จ้างแทน → แตะคืนนั้นแล้วแก้ชื่อเป็น<b>ครูที่อยู่เวรจริง</b> ใส่เหตุผล (ไม่บังคับ) · ระบบบันทึกรายการเปลี่ยนให้อัตโนมัติ</li>
-<li>นักเรียนไม่ถึงเกณฑ์ ครูอยู่คนเดียว → ติ๊ก <b>เวรเดี่ยว</b> (ได้ค่าตอบแทน 2 ส่วน)</li>
-<li>ผ่านวันเวรไปแล้ว → แท็บ <b>สรุป</b> → <b>✔ ยืนยันทุกคืนที่ผ่านมาแล้ว</b> (แก้ชื่อให้ตรงก่อนกด) ระบบรวมยอดสะสมให้ · คืนที่ยืนยันแล้วล็อกชื่อ ถ้าต้องแก้ให้แตะคืนนั้น → ยกเลิกการยืนยัน</li>
-<li>แก้อะไรแล้ว <b>กดบันทึกทุกครั้ง</b></li>
-</ol>
-<h3>สิ้นเดือน / จ่ายเงิน</h3>
-<ol>
-<li>ยืนยันคืนที่เหลือให้ครบ</li>
-<li>แท็บ <b>สรุป</b>: กรอก <b>ยอดที่การเงินโอนมา</b> ดูแถบเทียบกับยอดตามระเบียบ (ไม่ตรง → ดูหัวข้อ 5)</li>
-<li>กด <b>ปิดเดือน</b> → เลือก<b>วิธีจ่าย</b>ตามมติหอ (เห็นยอดทั้ง 2 แบบ) → ปิดเดือน (ตารางเดือนนั้นจะแก้ไม่ได้จนกว่าจะเปิดอีกครั้ง)</li>
-<li><b>พิมพ์ใบลงชื่อรับเงิน</b> ให้ครูลงชื่อ เขียนวันที่โอนในช่องหมายเหตุ · ส่งออก CSV เก็บไว้ได้</li>
-<li>กด <b>บันทึก</b> แล้ว <b>สำรองข้อมูล</b> (หัวข้อ 7)</li>
-</ol>
+<section class="section-block">
+  <h2 id="g-month">3. งานประจำเดือน (เช็กลิสต์)</h2>
+  <h3>ก่อนเดือนเริ่ม</h3>
+  <ol>
+    <li>แท็บ <b>ครู</b>: กรอก<b>วันไม่ว่าง</b> (ห้ามจัด) และ<b>คืนกลับจากราชการ</b> (ควรได้พัก ระบบเลี่ยงให้ก่อน) ดู "ผลกระทบ" ถ้าขึ้น ✖ แปลว่าคืนนั้นจัดไม่ได้ ต้องพิจารณาเอง</li>
+    <li><b>จัดเดือนก่อนหน้าให้เสร็จก่อน</b> (เพื่อต่อชุดชาย/หญิงข้ามเดือนให้ถูก)</li>
+    <li>แท็บ <b>ตาราง</b> → ปุ่ม <b>สร้างตาราง</b> (กดซ้ำ = ลองแบบอื่น) · คืนที่ล็อก <span class="ui-chip">🔒</span> เวรเดี่ยว และคืนที่ยืนยันแล้ว <span class="ui-chip">✔</span> จะไม่ถูกเปลี่ยน</li>
+    <li>คืนที่ขึ้น "รอหัวหน้าหอ" หรือสีแดง → แตะคืนนั้นเพื่อเลือกครูเอง · ใช้ <b>สลับครู</b> เพื่อแลกครูระหว่าง 2 คืน</li>
+    <li>กด <b>บันทึก</b></li>
+    <li>กด <b>ประกาศตาราง</b> (ระบบเก็บสำเนาตารางที่ส่งให้ครู) แล้วกด <b>บันทึก</b> อีกครั้ง</li>
+    <li>ปุ่ม <b>ส่ง LINE</b> → ตรวจรูปและข้อความ → <b>แชร์รูป + ข้อความ</b> → เลือกกลุ่ม LINE แล้วกดส่งเอง</li>
+  </ol>
 
-<h2 id="g-rules">4. กติกาจัดเวร (ระบบตรวจให้)</h2>
-<table>
-<tr><th>รหัส</th><th>กติกา</th><th>สี</th></tr>
-<tr><td>B1</td><td>คู่เวรเพศเดียวกัน (ชาย-ชาย หรือ หญิง-หญิง)</td><td>แดง</td></tr>
-<tr><td>B2</td><td>สลับชุดชาย/หญิงทุกคืน</td><td>แดง</td></tr>
-<tr><td>B3</td><td>คืนแรกของเดือนต้องสลับจากคืนสุดท้ายของเดือนก่อน</td><td>แดง</td></tr>
-<tr><td>B4</td><td>ห้ามอยู่เวรนอนติดกับเวรกลางวันของตัวเอง (วันเดียวกัน หรือเช้าวันถัดไป) เพราะรวมแล้วเกิน 24 ชั่วโมง</td><td>แดง</td></tr>
-<tr><td>U</td><td>ครูอยู่เวรในวันที่แจ้งไม่ว่าง</td><td>แดง</td></tr>
-<tr><td>R</td><td>ครูอยู่เวรในคืนกลับจากราชการ (ควรได้พัก จัดได้ถ้าจำเป็น)</td><td>เหลือง</td></tr>
-<tr><td>N</td><td>ครูคนเดียวอยู่เวร 2 คืนติดกัน</td><td>เหลือง</td></tr>
-<tr><td>P</td><td>คืนที่ยังไม่มีครู/ไม่ครบ 2 คน ("รอหัวหน้าหอ")</td><td>เหลือง</td></tr>
-</table>
-<p><b>ความเป็นธรรม:</b> ตัวสร้างตารางเกลี่ย<b>จำนวนเวรสะสมทั้งเทอม</b>ก่อน แล้วจึงเกลี่ย<b>เวรวันหยุด</b> (คืนเสาร์ คืนอาทิตย์ คืนวันหยุดนักขัตฤกษ์) · ดู<b>สมุดสะสมเวร</b>ที่แท็บสรุป และแนบไปกับรูปตาราง/หน้าพิมพ์ได้</p>
-<p>ช่วงที่ครูหลายคนติดภารกิจ ระบบ<b>ไม่ผ่อนกติกาเอง</b> คืนที่จัดไม่ได้จะเป็น "รอหัวหน้าหอ" ให้พิจารณาเอง · ครูแจ้งด้วยวาจาได้ ไม่ต้องมีใบ</p>
+  <h3>ระหว่างเดือน</h3>
+  <ol>
+    <li>มีการเปลี่ยนเวร/จ้างแทน → แตะคืนนั้นแล้วแก้ชื่อเป็น<b>ครูที่อยู่เวรจริง</b> ใส่เหตุผล (ไม่บังคับ) · ระบบบันทึกรายการเปลี่ยนให้อัตโนมัติ</li>
+    <li>นักเรียนไม่ถึงเกณฑ์ ครูอยู่คนเดียว → ติ๊ก <b>เวรเดี่ยว</b> (ได้ค่าตอบแทน 2 ส่วน)</li>
+    <li>ผ่านวันเวรไปแล้ว → แท็บ <b>สรุป</b> → <b>✔ ยืนยันทุกคืนที่ผ่านมาแล้ว</b> (แก้ชื่อให้ตรงก่อนกด) ระบบรวมยอดสะสมให้ · คืนที่ยืนยันแล้วล็อกชื่อ ถ้าต้องแก้ให้แตะคืนนั้น → ยกเลิกการยืนยัน</li>
+    <li>แก้อะไรแล้ว <b>กดบันทึกทุกครั้ง</b></li>
+  </ol>
 
-<h2 id="g-pay">5. ค่าตอบแทน</h2>
-<p>ระบบคิด<b>ยอดตามระเบียบล่วงหน้า</b>ทุกเดือน (อัตราตั้งต้น คืนธรรมดา 200 · คืนวันหยุด 420 บาทต่อคืน แก้ได้ที่แท็บสรุป) ส่วน<b>วิธีแบ่งจ่ายเป็นมติของหอ</b> เลือกได้แยกแต่ละเดือน:</p>
-<table>
-<tr><th>วิธี</th><th>คิดอย่างไร</th><th>ถ้ายอดโอนไม่ตรงระเบียบ</th></tr>
-<tr><td><b>หารเท่ากัน</b></td><td>ยอดที่ได้รับ ÷ จำนวนคืนที่มีเวร ÷ 2 = ต่อครู 1 คน 1 คืน (เวรเดี่ยว ×2)</td><td>จ่ายรวมเท่ากับที่ได้รับพอดี (ทุกคนรับส่วนต่างเท่ากัน)</td></tr>
-<tr><td><b>ตามระเบียบการเงิน</b></td><td>คืนธรรมดา ÷ 2 และคืนวันหยุด ÷ 2 ต่อคน (เวรเดี่ยวได้เต็มคืน)</td><td>จ่ายตามระเบียบ ไม่เท่ากับที่ได้รับ (ขาด = ต้องหาเพิ่ม · เกิน = เหลือ)</td></tr>
-</table>
-<ul>
-<li>ยอดไม่ตรง ตรวจก่อน: <b>วันพระ/วันหยุดชดเชย</b>ใส่ครบไหม → <b>ตาราง</b>ตรงกับที่อยู่จริงไหม → แล้วค่อยสอบถามการเงิน</li>
-<li>นับเวรตามวันที่เริ่มเวร (18:00) · ไม่ปัดเศษ แสดงถึงสตางค์</li>
-<li>จ้างแทน: ใส่ชื่อครูที่อยู่จริง เงินไปตามชื่อนั้น</li>
-<li>เดือนที่ปิดแล้วจดวิธีและอัตราไว้ เปลี่ยนภายหลังไม่กระทบ</li>
-</ul>
+  <h3>สิ้นเดือน / จ่ายเงิน</h3>
+  <ol>
+    <li>ยืนยันคืนที่เหลือให้ครบ</li>
+    <li>แท็บ <b>สรุป</b>: กรอก <b>ยอดที่การเงินโอนมา</b> ดูแถบเทียบกับยอดตามระเบียบ (ไม่ตรง → ดูหัวข้อ 5)</li>
+    <li>กด <b>ปิดเดือน</b> → เลือก<b>วิธีจ่าย</b>ตามมติหอ (เห็นยอดทั้ง 2 แบบ) → ปิดเดือน (ตารางเดือนนั้นจะแก้ไม่ได้จนกว่าจะเปิดอีกครั้ง)</li>
+    <li><b>พิมพ์ใบลงชื่อรับเงิน</b> ให้ครูลงชื่อ เขียนวันที่โอนในช่องหมายเหตุ · ส่งออก <span class="tech-pill">CSV</span> เก็บไว้ได้</li>
+    <li>กด <b>บันทึก</b> แล้ว <b>สำรองข้อมูล</b> (หัวข้อ 7)</li>
+  </ol>
+</section>
 
-<h2 id="g-icons">6. สัญลักษณ์บนหน้าจอ</h2>
-<ul>
-<li>หัวการ์ด/ชื่อโทน<b>ฟ้า</b> = ชุดชาย · โทน<b>ชมพู</b> = ชุดหญิง · เทา = ไม่มีเวร</li>
-<li>🔒 ล็อกคืน (ตัวสร้างไม่แก้) · ✔ ยืนยันว่าอยู่จริงแล้ว · <b>เดี่ยว</b> = เวรเดี่ยว · <b>หยุด</b> = คืนวันหยุด · <b>แก้</b> = เปลี่ยนหลังประกาศ</li>
-<li>📝 ร่าง · 📣 ประกาศแล้ว · 🔒 ปิดเดือนแล้ว</li>
-<li>กระดิ่ง = จำนวนรายการที่ต้องดู · แถบเหลือง "มีการแก้ไขที่ยังไม่ได้บันทึก" = ต้องกดบันทึก</li>
-</ul>
+<section class="section-block">
+  <h2 id="g-rules">4. กติกาจัดเวร (ระบบตรวจให้)</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th style="width: 75px;">รหัส</th><th>กติกา</th><th style="width: 80px; text-align: center;">สี</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-red"><td><span class="badge-code">B1</span></td><td>คู่เวรเพศเดียวกัน (ชาย-ชาย หรือ หญิง-หญิง)</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
+        <tr class="row-red"><td><span class="badge-code">B2</span></td><td>สลับชุดชาย/หญิงทุกคืน</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
+        <tr class="row-red"><td><span class="badge-code">B3</span></td><td>คืนแรกของเดือนต้องสลับจากคืนสุดท้ายของเดือนก่อน</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
+        <tr class="row-red"><td><span class="badge-code">B4</span></td><td>ห้ามอยู่เวรนอนติดกับเวรกลางวันของตัวเอง (วันเดียวกัน หรือเช้าวันถัดไป) เพราะรวมแล้วเกิน 24 ชั่วโมง</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
+        <tr class="row-red"><td><span class="badge-code">U</span></td><td>ครูอยู่เวรในวันที่แจ้งไม่ว่าง</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
+        <tr class="row-yellow"><td><span class="badge-code">R</span></td><td>ครูอยู่เวรในคืนกลับจากราชการ (ควรได้พัก จัดได้ถ้าจำเป็น)</td><td style="text-align: center;"><span class="badge-yellow">เหลือง</span></td></tr>
+        <tr class="row-yellow"><td><span class="badge-code">N</span></td><td>ครูคนเดียวอยู่เวร 2 คืนติดกัน</td><td style="text-align: center;"><span class="badge-yellow">เหลือง</span></td></tr>
+        <tr class="row-yellow"><td><span class="badge-code">P</span></td><td>คืนที่ยังไม่มีครู/ไม่ครบ 2 คน ("รอหัวหน้าหอ")</td><td style="text-align: center;"><span class="badge-yellow">เหลือง</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><b>ความเป็นธรรม:</b> ตัวสร้างตารางเกลี่ย<b>จำนวนเวรสะสมทั้งเทอม</b>ก่อน แล้วจึงเกลี่ย<b>เวรวันหยุด</b> (คืนเสาร์ คืนอาทิตย์ คืนวันหยุดนักขัตฤกษ์) · ดู<b>สมุดสะสมเวร</b>ที่แท็บสรุป และแนบไปกับรูปตาราง/หน้าพิมพ์ได้</p>
+  <p>ช่วงที่ครูหลายคนติดภารกิจ ระบบ<b>ไม่ผ่อนกติกาเอง</b> คืนที่จัดไม่ได้จะเป็น "รอหัวหน้าหอ" ให้พิจารณาเอง · ครูแจ้งด้วยวาจาได้ ไม่ต้องมีใบ</p>
+</section>
 
-<h2 id="g-backup">7. บันทึก สำรอง และย้ายเครื่อง (สำคัญ)</h2>
-<ul>
-<li><b>บันทึก</b> = เก็บในเครื่องนี้ (และส่งขึ้น GitHub ถ้าเปิดซิงก์) · ยังไม่กดบันทึก = ยังเป็นฉบับร่าง</li>
-<li><b>สำรองข้อมูล</b> (แท็บตั้งค่า หรือเพิ่มเติม) ได้ไฟล์ .json เก็บไว้ใน iCloud Drive/Google Drive ทุกครั้งที่ปิดเดือน</li>
-<li><b>⚠ ลบไอคอนแอปจากหน้าจอโฮม = ข้อมูลในไอคอนนั้นหายด้วย</b> ต้องซิงก์/สำรองก่อนเสมอ แล้วค่อยดึง/นำเข้าหลังเพิ่มไอคอนใหม่</li>
-<li>ข้อมูลในไอคอนหน้าจอโฮม กับใน Safari ปกติ <b>แยกกัน</b> ใช้ที่เดียวเป็นหลัก</li>
-<li>ย้ายเครื่อง: เครื่องเก่า สำรอง/ซิงก์ → เครื่องใหม่ นำเข้า/ดึงข้อมูล</li>
-<li>ทำพลาด: แท็บตั้งค่า → <b>ประวัติเวอร์ชัน</b> ย้อนกลับได้ 10 ครั้งล่าสุด · หรือ "ยกเลิกการแก้ไข" ถ้ายังไม่บันทึก</li>
-<li><b>ห้ามส่ง token ของ GitHub ให้ใคร</b> (รวมถึง AI) ถ้าเผลอส่ง ให้ลบแล้วสร้างใหม่</li>
-</ul>
+<section class="section-block">
+  <h2 id="g-pay">5. ค่าตอบแทน</h2>
+  <p>ระบบคิด<b>ยอดตามระเบียบล่วงหน้า</b>ทุกเดือน (อัตราตั้งต้น คืนธรรมดา 200 · คืนวันหยุด 420 บาทต่อคืน แก้ได้ที่แท็บสรุป) ส่วน<b>วิธีแบ่งจ่ายเป็นมติของหอ</b> เลือกได้แยกแต่ละเดือน:</p>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th style="width: 145px;">วิธี</th><th>คิดอย่างไร</th><th>ถ้ายอดโอนไม่ตรงระเบียบ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>หารเท่ากัน</b></td><td>ยอดที่ได้รับ ÷ จำนวนคืนที่มีเวร ÷ 2 = ต่อครู 1 คน 1 คืน (เวรเดี่ยว ×2)</td><td>จ่ายรวมเท่ากับที่ได้รับพอดี (ทุกคนรับส่วนต่างเท่ากัน)</td></tr>
+        <tr><td><b>ตามระเบียบการเงิน</b></td><td>คืนธรรมดา ÷ 2 และคืนวันหยุด ÷ 2 ต่อคน (เวรเดี่ยวได้เต็มคืน)</td><td>จ่ายตามระเบียบ ไม่เท่ากับที่ได้รับ (ขาด = ต้องหาเพิ่ม · เกิน = เหลือ)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>ยอดไม่ตรง ตรวจก่อน: <b>วันพระ/วันหยุดชดเชย</b>ใส่ครบไหม → <b>ตาราง</b>ตรงกับที่อยู่จริงไหม → แล้วค่อยสอบถามการเงิน</li>
+    <li>นับเวรตามวันที่เริ่มเวร (18:00) · ไม่ปัดเศษ แสดงถึงสตางค์</li>
+    <li>จ้างแทน: ใส่ชื่อครูที่อยู่จริง เงินไปตามชื่อนั้น</li>
+    <li>เดือนที่ปิดแล้วจดวิธีและอัตราไว้ เปลี่ยนภายหลังไม่กระทบ</li>
+  </ul>
+</section>
 
-<h2 id="g-help">8. แก้ปัญหาเบื้องต้น</h2>
-<ul>
-<li><b>พิมพ์จากไอคอนหน้าจอโฮมไม่ได้</b> (ข้อจำกัดของ iPhone): ระบบสร้างเป็นรูป → แชร์ → เลือก "พิมพ์" · หรือเปิดใน Safari/Mac แล้วพิมพ์ตรง</li>
-<li><b>แอปยังเป็นเวอร์ชันเก่า</b>: ปิดแอปแล้วเปิดใหม่ รอ 1–2 นาที (เลขเวอร์ชันอยู่ใต้ "สวัสดี หัวหน้าหอ")</li>
-<li><b>ขึ้นแถบแดง "ไฟล์ตัวแอปไม่ตรงกัน"</b>: อัปโหลดไฟล์แอปไม่ครบชุด</li>
-<li><b>ซิงก์ GitHub แจ้งว่าข้อมูลชนกัน</b>: เลือกว่าจะใช้ฉบับในเครื่องหรือฉบับใน GitHub (ดูวันเวลาที่บันทึกประกอบ)</li>
-<li><b>สร้างตารางแล้วบางคืนเป็น "รอหัวหน้าหอ"</b>: ครูที่จัดได้ไม่พอตามกติกา → เลือกเองหรือสลับครู</li>
-<li><b>ชื่อขึ้น "ครูครู…"</b>: ชื่อเล่นมีคำว่า "ครู" อยู่แล้ว ให้แก้ชื่อเล่นที่แท็บครู (ระบบเติม "ครู" ให้เอง)</li>
-</ul>
+<section class="section-block">
+  <h2 id="g-icons">6. สัญลักษณ์บนหน้าจอ</h2>
+  <ul>
+    <li>หัวการ์ด/ชื่อโทน<span class="tag-blue"><b>ฟ้า</b></span> = ชุดชาย · โทน<span class="tag-pink"><b>ชมพู</b></span> = ชุดหญิง · <span class="tag-gray">เทา</span> = ไม่มีเวร</li>
+    <li><span class="ui-chip">🔒</span> ล็อกคืน (ตัวสร้างไม่แก้) · <span class="ui-chip">✔</span> ยืนยันว่าอยู่จริงแล้ว · <b>เดี่ยว</b> = เวรเดี่ยว · <b>หยุด</b> = คืนวันหยุด · <b>แก้</b> = เปลี่ยนหลังประกาศ</li>
+    <li><span class="ui-chip">📝</span> ร่าง · <span class="ui-chip">📣</span> ประกาศแล้ว · <span class="ui-chip">🔒</span> ปิดเดือนแล้ว</li>
+    <li><span class="ui-chip">🔔</span> กระดิ่ง = จำนวนรายการที่ต้องดู · แถบเหลือง "มีการแก้ไขที่ยังไม่ได้บันทึก" = ต้องกดบันทึก</li>
+  </ul>
+</section>
 
-<h2 id="g-handover">9. ส่งต่อหัวหน้าหอคนถัดไป</h2>
-<ol>
-<li>ปิดเดือนสุดท้ายที่รับผิดชอบ แล้วสำรองข้อมูล (.json)</li>
-<li>ส่งไฟล์สำรอง + ลิงก์แอป + คู่มือนี้ (ปุ่ม "ดาวน์โหลดคู่มือ") ให้หัวหน้าคนใหม่</li>
-<li>หัวหน้าคนใหม่ทำตามหัวข้อ 2 · ถ้าใช้ซิงก์ GitHub ให้สร้าง token ของตัวเองใหม่</li>
-</ol>
+<section class="section-block">
+  <h2 id="g-backup">7. บันทึก สำรอง และย้ายเครื่อง (สำคัญ)</h2>
+  <ul>
+    <li><b>บันทึก</b> = เก็บในเครื่องนี้ (และส่งขึ้น <span class="tech-pill">GitHub</span> ถ้าเปิดซิงก์) · ยังไม่กดบันทึก = ยังเป็นฉบับร่าง</li>
+    <li><b>สำรองข้อมูล</b> (แท็บตั้งค่า หรือเพิ่มเติม) ได้ไฟล์ <span class="tech-pill">.json</span> เก็บไว้ใน <span class="tech-pill">iCloud Drive</span>/<span class="tech-pill">Google Drive</span> ทุกครั้งที่ปิดเดือน</li>
+    <li class="li-warning"><b>⚠ ลบไอคอนแอปจากหน้าจอโฮม = ข้อมูลในไอคอนนั้นหายด้วย</b> ต้องซิงก์/สำรองก่อนเสมอ แล้วค่อยดึง/นำเข้าหลังเพิ่มไอคอนใหม่</li>
+    <li>ข้อมูลในไอคอนหน้าจอโฮม กับใน <span class="tech-pill">Safari</span> ปกติ <b>แยกกัน</b> ใช้ที่เดียวเป็นหลัก</li>
+    <li>ย้ายเครื่อง: เครื่องเก่า สำรอง/ซิงก์ → เครื่องใหม่ นำเข้า/ดึงข้อมูล</li>
+    <li>ทำพลาด: แท็บตั้งค่า → <b>ประวัติเวอร์ชัน</b> ย้อนกลับได้ 10 ครั้งล่าสุด · หรือ "ยกเลิกการแก้ไข" ถ้ายังไม่บันทึก</li>
+    <li><b>ห้ามส่ง <span class="tech-pill">token</span> ของ <span class="tech-pill">GitHub</span> ให้ใคร</b> (รวมถึง AI) ถ้าเผลอส่ง ให้ลบแล้วสร้างใหม่</li>
+  </ul>
+</section>
+
+<section class="section-block">
+  <h2 id="g-help">8. แก้ปัญหาเบื้องต้น</h2>
+  <ul>
+    <li><b>พิมพ์จากไอคอนหน้าจอโฮมไม่ได้</b> (ข้อจำกัดของ <span class="tech-pill">iPhone</span>): ระบบสร้างเป็นรูป → แชร์ → เลือก "พิมพ์" · หรือเปิดใน <span class="tech-pill">Safari</span>/<span class="tech-pill">Mac</span> แล้วพิมพ์ตรง</li>
+    <li><b>แอปยังเป็นเวอร์ชันเก่า</b>: ปิดแอปแล้วเปิดใหม่ รอ 1–2 นาที (เลขเวอร์ชันอยู่ใต้ "สวัสดี หัวหน้าหอ")</li>
+    <li><b>ขึ้นแถบแดง "ไฟล์ตัวแอปไม่ตรงกัน"</b>: อัปโหลดไฟล์แอปไม่ครบชุด</li>
+    <li><b>ซิงก์ <span class="tech-pill">GitHub</span> แจ้งว่าข้อมูลชนกัน</b>: เลือกว่าจะใช้ฉบับในเครื่องหรือฉบับใน <span class="tech-pill">GitHub</span> (ดูวันเวลาที่บันทึกประกอบ)</li>
+    <li><b>สร้างตารางแล้วบางคืนเป็น "รอหัวหน้าหอ"</b>: ครูที่จัดได้ไม่พอตามกติกา → เลือกเองหรือสลับครู</li>
+    <li><b>ชื่อขึ้น "ครูครู…"</b>: ชื่อเล่นมีคำว่า "ครู" อยู่แล้ว ให้แก้ชื่อเล่นที่แท็บครู (ระบบเติม "ครู" ให้เอง)</li>
+  </ul>
+</section>
+
+<section class="section-block">
+  <h2 id="g-handover">9. ส่งต่อหัวหน้าหอคนถัดไป</h2>
+  <ol>
+    <li>ปิดเดือนสุดท้ายที่รับผิดชอบ แล้วสำรองข้อมูล (<span class="tech-pill">.json</span>)</li>
+    <li>ส่งไฟล์สำรอง + ลิงก์แอป + คู่มือนี้ (ปุ่ม "ดาวน์โหลดคู่มือ") ให้หัวหน้าคนใหม่</li>
+    <li>หัวหน้าคนใหม่ทำตามหัวข้อ 2 · ถ้าใช้ซิงก์ <span class="tech-pill">GitHub</span> ให้สร้าง <span class="tech-pill">token</span> ของตัวเองใหม่</li>
+  </ol>
+</section>
 `;
 
   const teacher = `
-<h2 id="g-teacher">สำหรับครูในหอ: ตารางเวรจัดอย่างไร</h2>
-<p>ตารางเวรหอนอนจัดด้วยระบบช่วยจัด โดยหัวหน้าหอเป็นผู้ตรวจและตัดสินใจขั้นสุดท้าย เป้าหมายคือ<b>ถูกกติกา โปร่งใส และเป็นธรรม</b></p>
-<h3>กติกาที่ใช้ทุกคืน</h3>
-<ul>
-<li>เวร 18:00–07:00 น. คืนละ 2 คน เพศเดียวกัน และสลับชุดชาย/หญิงทุกคืน (ต่อเนื่องข้ามเดือน)</li>
-<li>ไม่จัดเวรนอนติดกับเวรกลางวันของตัวเอง (วันเดียวกัน หรือเช้าวันถัดไป) เพื่อไม่ให้ทำงานเกิน 24 ชั่วโมง</li>
-<li>ไม่จัดในวันที่แจ้งไม่ว่าง · คืนที่กลับจากราชการระบบพยายามให้ได้พักก่อน</li>
-</ul>
-<h3>ความเป็นธรรม</h3>
-<ul>
-<li>นับจำนวนเวร<b>สะสมทั้งเทอม</b> (เริ่มนับใหม่ทุกเทอม) ให้แต่ละคนใกล้เคียงกันมากที่สุด</li>
-<li>เกลี่ย<b>เวรวันหยุด</b> (คืนเสาร์ คืนอาทิตย์ คืนวันหยุดนักขัตฤกษ์) ให้ทั่วถึง</li>
-<li>ทุกเดือนแนบ<b>สมุดสะสมเวร</b>ไปกับตาราง ทุกคนตรวจดูได้</li>
-</ul>
-<h3>แจ้งไม่ว่าง / แลกเวร / จ้างแทน</h3>
-<ul>
-<li>แจ้งหัวหน้าหอล่วงหน้าเท่าที่ทำได้ ไม่ต้องมีใบหรือเอกสาร</li>
-<li>แลกเวรหรือจ้างแทนกันเองได้ แจ้งหัวหน้าหอให้แก้ในตาราง · <b>ค่าตอบแทนจ่ายตามชื่อคนที่อยู่เวรจริง</b></li>
-<li>การเปลี่ยนหลังประกาศตารางมีบันทึกไว้ทุกครั้ง (วันที่ เดิม → ใหม่ เหตุผล)</li>
-</ul>
-<h3>ค่าตอบแทน</h3>
-<ul>
-<li>ระเบียบการเงิน: คืนธรรมดา 200 บาท · คืนวันหยุด 420 บาท ต่อคืน (ครู 2 คนแบ่งกัน) · เวรเดี่ยวได้เต็มคืน</li>
-<li>วิธีแบ่งจ่ายในหอเป็น<b>มติของหอ</b> (หารเท่ากัน หรือ ตามระเบียบ) ใบลงชื่อรับเงินระบุวิธีคิดและจำนวนเวรของแต่ละคนไว้</li>
-</ul>
+<div class="teacher">
+  <div class="teacher-header-banner">
+    <div class="teacher-badge">เอกสารประชาสัมพันธ์ประจำหอนอน</div>
+    <div class="teacher-sub-meta">หอพักนักเรียน หอฟ้าทะลายโจร</div>
+  </div>
+  <h2 id="g-teacher">สำหรับครูในหอ: ตารางเวรจัดอย่างไร</h2>
+  <p>ตารางเวรหอนอนจัดด้วยระบบช่วยจัด โดยหัวหน้าหอเป็นผู้ตรวจและตัดสินใจขั้นสุดท้าย เป้าหมายคือ<b>ถูกกติกา โปร่งใส <span style="white-space: nowrap;">และเป็นธรรม</span></b></p>
+  
+  <h3>กติกาที่ใช้ทุกคืน</h3>
+  <ul>
+    <li>เวร 18:00–07:00 น. คืนละ 2 คน เพศเดียวกัน และสลับชุดชาย/หญิงทุกคืน (ต่อเนื่องข้ามเดือน)</li>
+    <li>ไม่จัดเวรนอนติดกับเวรกลางวันของตัวเอง (วันเดียวกัน หรือเช้าวันถัดไป) เพื่อไม่ให้ทำงานเกิน 24 ชั่วโมง</li>
+    <li>ไม่จัดในวันที่แจ้งไม่ว่าง · คืนที่กลับจากราชการระบบพยายามให้ได้พักก่อน</li>
+  </ul>
+
+  <h3>ความเป็นธรรม</h3>
+  <ul>
+    <li>นับจำนวนเวร<b>สะสมทั้งเทอม</b> (เริ่มนับใหม่ทุกเทอม) ให้แต่ละคนใกล้เคียงกันมากที่สุด</li>
+    <li>เกลี่ย<b>เวรวันหยุด</b> (คืนเสาร์ คืนอาทิตย์ คืนวันหยุดนักขัตฤกษ์) ให้ทั่วถึง</li>
+    <li>ทุกเดือนแนบ<b>สมุดสะสมเวร</b>ไปกับตาราง ทุกคนตรวจดูได้</li>
+  </ul>
+
+  <h3>แจ้งไม่ว่าง / แลกเวร / จ้างแทน</h3>
+  <ul>
+    <li>แจ้งหัวหน้าหอล่วงหน้าเท่าที่ทำได้ ไม่ต้องมีใบหรือเอกสาร</li>
+    <li>แลกเวรหรือจ้างแทนกันเองได้ แจ้งหัวหน้าหอให้แก้ในตาราง · <b>ค่าตอบแทนจ่ายตามชื่อคนที่อยู่เวรจริง</b></li>
+    <li>การเปลี่ยนหลังประกาศตารางมีบันทึกไว้ทุกครั้ง (วันที่ เดิม → ใหม่ เหตุผล)</li>
+  </ul>
+
+  <h3>ค่าตอบแทน</h3>
+  <ul>
+    <li>ระเบียบการเงิน: คืนธรรมดา 200 บาท · คืนวันหยุด 420 บาท ต่อคืน (ครู 2 คนแบ่งกัน) · เวรเดี่ยวได้เต็มคืน</li>
+    <li>วิธีแบ่งจ่ายในหอเป็น<b>มติของหอ</b> (หารเท่ากัน หรือ ตามระเบียบ) ใบลงชื่อรับเงินระบุวิธีคิดและจำนวนเวรของแต่ละคนไว้</li>
+  </ul>
+</div>
 `;
 
-  const api = { head, teacher };
+  const css = `
+.gdoc { --g1: #155e43; --g0: #0e3f2d; --gl: #e8f5ee; --ga: #237352; --gt: #1e293b; --gm: #475569; --gb: #cbd5e1; --gbl: #e2e8f0;
+  color: var(--gt); line-height: 1.66; font-size: 15px; }
+.gdoc *, .gdoc *::before, .gdoc *::after { box-sizing: border-box; }
+.gdoc .doc-header { border-bottom: 2.5px solid var(--g1); padding-bottom: 14px; margin-bottom: 18px; }
+.gdoc .header-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--gl); color: var(--g1); padding: 3px 12px; border-radius: 999px; font-size: .85em; font-weight: 600; margin-bottom: 8px; border: 1px solid #cce5d7; }
+.gdoc h1 { font-size: 1.45em; font-weight: 700; color: var(--g0); margin: 0 0 6px; line-height: 1.35; }
+.gdoc .doc-subtitle { font-size: .92em; color: var(--gm); margin: 0; }
+.gdoc h2 { font-size: 1.2em; font-weight: 700; color: var(--g0); border-left: 4px solid var(--g1); padding: 3px 0 3px 10px; margin: 26px 0 10px; line-height: 1.35;
+  background: linear-gradient(to right, var(--gl) 0%, transparent 70%); break-after: avoid; page-break-after: avoid; scroll-margin-top: 90px; }
+.gdoc h3 { font-size: 1.04em; font-weight: 600; color: var(--ga); margin: 16px 0 6px; display: flex; align-items: center; gap: 6px; break-after: avoid; page-break-after: avoid; }
+.gdoc h3::before { content: "•"; color: var(--ga); font-size: 1.3em; line-height: 1; }
+.gdoc p { margin: 0 0 10px; }
+.gdoc b, .gdoc strong { font-weight: 600; color: #0f172a; }
+.gdoc ul { margin: 6px 0 14px; padding-left: 22px; }
+.gdoc ul li { margin-bottom: 7px; }
+.gdoc ul li::marker { color: var(--ga); }
+.gdoc ul > li > ul { margin: 4px 0; padding-left: 18px; }
+.gdoc ol { list-style: none; counter-reset: gstep; padding-left: 0; margin: 8px 0 16px; }
+.gdoc ol > li { counter-increment: gstep; position: relative; padding-left: 34px; margin-bottom: 9px; }
+.gdoc ol > li::before { content: counter(gstep); position: absolute; left: 0; top: 2px; width: 23px; height: 23px; background: var(--g1); color: #fff; border-radius: 50%;
+  font-size: .8em; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(21, 94, 67, .25); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.gdoc ol > li > ul { margin-top: 6px; }
+.gdoc .table-wrapper { width: 100%; margin: 10px 0 14px; overflow-x: auto; border-radius: 8px; border: 1px solid var(--gb); }
+.gdoc table { border-collapse: collapse; width: 100%; margin: 0; font-size: .93em; }
+.gdoc th, .gdoc td { padding: 7px 10px; text-align: left; vertical-align: top; border: 0; border-bottom: 1px solid var(--gbl); }
+.gdoc th { background: #eef6f1; color: var(--g0); font-weight: 600; border-bottom: 2px solid #b6d4c4; white-space: nowrap; }
+.gdoc tr:last-child td { border-bottom: none; }
+.gdoc tr.row-red { box-shadow: inset 3.5px 0 0 #ef4444; background: #fffafa; }
+.gdoc tr.row-yellow { box-shadow: inset 3.5px 0 0 #f59e0b; background: #fffdf5; }
+.gdoc .badge-code { display: inline-block; font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; background: #f1f5f9; color: #0f172a; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--gb); font-size: .87em; }
+.gdoc .badge-red, .gdoc .badge-yellow { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .84em; font-weight: 600; }
+.gdoc .badge-red { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.gdoc .badge-yellow { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.gdoc .tag-blue, .gdoc .tag-pink, .gdoc .tag-gray { padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+.gdoc .tag-blue { color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; }
+.gdoc .tag-pink { color: #be185d; background: #fce7f3; border: 1px solid #fbcfe8; }
+.gdoc .tag-gray { color: #475569; background: #f1f5f9; border: 1px solid var(--gbl); }
+.gdoc .ui-chip, .gdoc .tech-pill { display: inline-block; background: #f8fafc; border: 1px solid var(--gbl); padding: 0 5px; border-radius: 4px; font-size: .92em; }
+.gdoc .tech-pill { background: #f1f5f9; color: #334155; }
+.gdoc li.li-warning { background: #fffbeb; border-left: 3.5px solid #f59e0b; padding: 6px 12px; border-radius: 0 6px 6px 0; margin: 8px 0 10px -18px; list-style: none; color: #92400e; }
+.gdoc li.li-warning b { color: #92400e; }
+.gdoc .teacher { margin-top: 26px; padding: 22px 22px; background: #f4f9f6; border: 2px solid #b6d4c4; border-radius: 12px; box-shadow: inset 0 0 0 2px #eaf4ef; }
+.gdoc .teacher-header-banner { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: space-between; border-bottom: 1.5px solid #cbe3d5; padding-bottom: 10px; margin-bottom: 14px; }
+.gdoc .teacher-badge { display: inline-block; background: var(--g1); color: #fff; padding: 3px 10px; border-radius: 4px; font-size: .84em; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.gdoc .teacher-sub-meta { font-size: .82em; color: #64748b; }
+.gdoc .teacher h2 { margin-top: 0; background: none; border-left-color: var(--ga); font-size: 1.3em; }
+.gdoc .teacher h3 { color: var(--g0); border-bottom: 1px dashed #cfe2d7; padding-bottom: 4px; }
+.gdoc .section-block { margin-bottom: 14px; }
+.gtoc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 14px; }
+.gtoc .toc-category { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; }
+.gtoc .toc-category-title { font-size: .78rem; font-weight: 700; color: #64748b; margin-bottom: 6px; border-bottom: 1px solid #f1f5f9; padding-bottom: 3px; }
+.gtoc a { display: block; color: #1e293b; text-decoration: none; padding: 3px 4px; border-radius: 4px; font-size: .92rem; }
+.gtoc a:hover { color: #155e43; background: #e8f5ee; }
+@media print {
+  .gdoc { font-size: 10pt; line-height: 1.58; }
+  .gdoc .teacher { break-before: page; page-break-before: always; break-inside: avoid; page-break-inside: avoid; }
+  .gdoc tr, .gdoc .table-wrapper { break-inside: avoid; page-break-inside: avoid; }
+  .gdoc .table-wrapper { overflow: visible; }
+  .gdoc .doc-header, .gdoc h2, .gdoc tr.row-red, .gdoc tr.row-yellow, .gdoc th, .gdoc .badge-red, .gdoc .badge-yellow { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+`;
+
+  const api = { head, teacher, css };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.SOD_GUIDE = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -1248,7 +1342,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.7.2'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.7.3'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -1754,23 +1848,31 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
       '<div class="row" style="margin-top:10px"><label class="f">วันที่<input type="date" id="holDate"></label><label class="f grow">ชื่อวันหยุด<input type="text" id="holName" placeholder="เช่น วันมาฆบูชา / วันหยุดชดเชย" autocomplete="off"></label><button class="btn" data-action="hol-add">+ เพิ่มวันหยุด</button></div></div>';
   }
 
-  // ---------- คู่มือการใช้งาน (เนื้อหาใน guide.js) ----------
-  const G = window.SOD_GUIDE || { head: '<p>ไม่พบเนื้อหาคู่มือ (อัปโหลดไฟล์แอปไม่ครบ)</p>', teacher: '' };
-  const GUIDE_TOC = [['g-start', 'ระบบนี้ทำอะไร'], ['g-first', 'เริ่มใช้ครั้งแรก'], ['g-month', 'งานประจำเดือน'], ['g-rules', 'กติกาจัดเวร'], ['g-pay', 'ค่าตอบแทน'], ['g-icons', 'สัญลักษณ์'], ['g-backup', 'บันทึก/สำรอง'], ['g-help', 'แก้ปัญหา'], ['g-handover', 'ส่งต่อหัวหน้าคนถัดไป'], ['g-teacher', 'หน้าสำหรับครูในหอ']];
+  // ---------- คู่มือการใช้งาน (เนื้อหาและ css ใน guide.js · หน้าตาจากแบบที่ผู้ใช้ให้ Gemini ออกแบบ) ----------
+  const G = window.SOD_GUIDE || { head: '<p>ไม่พบเนื้อหาคู่มือ (อัปโหลดไฟล์แอปไม่ครบ)</p>', teacher: '', css: '' };
+  const GUIDE_TOC = [['g-start', '1. ระบบนี้ทำอะไร'], ['g-first', '2. เริ่มใช้ครั้งแรก / หัวหน้าหอคนใหม่'], ['g-month', '3. งานประจำเดือน (เช็กลิสต์)'], ['g-rules', '4. กติกาจัดเวร'], ['g-pay', '5. ค่าตอบแทน'], ['g-icons', '6. สัญลักษณ์บนหน้าจอ'], ['g-backup', '7. บันทึก สำรอง และย้ายเครื่อง'], ['g-help', '8. แก้ปัญหาเบื้องต้น'], ['g-handover', '9. ส่งต่อหัวหน้าหอคนถัดไป'], ['g-teacher', 'สำหรับครูในหอ: ตารางเวรจัดอย่างไร']];
+  const GUIDE_CATS = [['เริ่มต้นใช้งาน', [0, 1]], ['ปฏิบัติงานประจำเดือน', [2]], ['กติกา & ค่าตอบแทน', [3, 4]], ['ดูแลระบบ & แก้ปัญหา', [5, 6, 7, 8]], ['สำหรับครูในหอ', [9]]];
   const guideTitle = () => 'คู่มือการใช้งาน ระบบตารางเวรหอนอน ' + esc(state.dormName) + ' (v' + APP_VERSION + ')';
+  const guideHeader = () => '<header class="doc-header"><div class="header-badge">📖 ระบบจัดตารางเวรหอนอน</div><h1>' + guideTitle() + '</h1>' +
+    '<p class="doc-subtitle">คู่มือปฏิบัติงานสำหรับหัวหน้าหอนอน และข้อมูลการจัดเวรสำหรับครูประจำหอ</p></header>';
+  const guideToc = (jump) => '<div class="gtoc">' + GUIDE_CATS.map(([title, ix], c) => '<div class="toc-category"><div class="toc-category-title">หมวด ' + (c + 1) + ': ' + title + '</div>' +
+    ix.map((i) => '<a href="#' + GUIDE_TOC[i][0] + '"' + (jump ? ' data-action="guide-jump" data-id="' + GUIDE_TOC[i][0] + '"' : '') + '>' + GUIDE_TOC[i][1] + '</a>').join('') + '</div>').join('') + '</div>';
   function renderGuide() {
-    const toc = GUIDE_TOC.map(([id, t], i) => '<a href="#' + id + '" data-action="guide-jump" data-id="' + id + '">' + (i + 1 < GUIDE_TOC.length ? (i + 1) + '. ' : '') + t + '</a>').join('');
-    return '<div class="card noprint"><div class="row" style="justify-content:space-between"><button class="btn" data-action="guide-back">‹ กลับ</button>' +
+    return '<style>' + G.css + '</style><div class="card noprint"><div class="row" style="justify-content:space-between"><button class="btn" data-action="guide-back">‹ กลับ</button>' +
       '<div class="row">' + (isStandalone() ? '' : '<button class="btn" data-action="guide-print">พิมพ์ / บันทึก PDF</button>') + '<button class="btn primary" data-action="guide-file">' + (isStandalone() ? 'แชร์ / บันทึกไฟล์คู่มือ' : 'ดาวน์โหลดไฟล์คู่มือ') + '</button></div></div>' +
-      '<p class="muted" style="margin:8px 0 0">' + (isStandalone() ? 'แอปจากหน้าจอโฮมพิมพ์ตรงไม่ได้ · กดแชร์ไฟล์คู่มือ แล้วเปิดในแอปไฟล์หรือ Safari เพื่อพิมพ์/บันทึก PDF' : 'ไฟล์คู่มือเปิดได้ทุกเครื่องโดยไม่ต้องมีอินเทอร์เน็ต ส่งต่อหัวหน้าหอคนถัดไปได้') + '</p>' +
-      '<nav class="guide-toc">' + toc + '</nav></div>' +
-      '<article class="card guide"><h1>' + guideTitle() + '</h1>' + G.head + '</article>' +
-      '<article class="card guide guide-teacher">' + G.teacher + '</article>';
+      '<p class="muted" style="margin:8px 0 12px">' + (isStandalone() ? 'แอปจากหน้าจอโฮมพิมพ์ตรงไม่ได้ · กดแชร์ไฟล์คู่มือ แล้วเปิดในแอปไฟล์หรือ Safari เพื่อพิมพ์/บันทึก PDF' : 'ไฟล์คู่มือเปิดได้ทุกเครื่องโดยไม่ต้องมีอินเทอร์เน็ต ส่งต่อหัวหน้าหอคนถัดไปได้') + '</p>' +
+      guideToc(true) + '</div>' +
+      '<article class="card guide gdoc">' + guideHeader() + G.head + G.teacher + '</article>';
   }
-  // ไฟล์คู่มือแยก (HTML ไฟล์เดียว ไม่ต้องใช้เน็ต) ชื่อไฟล์ ASCII
+  // ไฟล์คู่มือแยก (HTML ไฟล์เดียว ไม่ต้องใช้เน็ต) ชื่อไฟล์ ASCII · css เดียวกับในแอป
   function guideFileHtml() {
-    const css = 'body{font-family:"Noto Sans Thai","Sarabun","Thonburi",system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0 16px;line-height:1.65;color:#14231d}h1{font-size:1.4rem;color:#17503D}h2{font-size:1.15rem;color:#17503D;border-bottom:2px solid #cfe5da;padding-bottom:4px;margin-top:28px}h3{font-size:1rem;margin:16px 0 4px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #9bb8aa;padding:6px 8px;text-align:left;vertical-align:top}th{background:#eaf4ef}.teacher{page-break-before:always;break-before:page}@media print{body{margin:0}}';
-    return '<!doctype html>\n<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + guideTitle() + '</title><style>' + css + '</style></head><body><h1>' + guideTitle() + '</h1>' + G.head + '<div class="teacher">' + G.teacher + '</div></body></html>\n';
+    const page = 'body{margin:0;background:#f8fafc;font-family:"Noto Sans Thai","Sarabun","Thonburi",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}' +
+      '.wrap{max-width:880px;margin:24px auto;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 4px 24px -2px rgba(0,0,0,.07);padding:32px 36px}' +
+      '.navbox{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:24px}' +
+      '@media (max-width:640px){.wrap{margin:0;border:0;border-radius:0;padding:20px 16px}}' +
+      '@page{size:A4 portrait;margin:14mm 16mm}@media print{body{background:#fff}.wrap{margin:0;padding:0;border:0;box-shadow:none;max-width:none}.navbox{display:none}}';
+    return '<!doctype html>\n<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + guideTitle() + '</title><style>' + page + G.css + '</style></head>' +
+      '<body><div class="wrap gdoc">' + guideHeader() + '<nav class="navbox">' + guideToc(false) + '</nav>' + G.head + G.teacher + '</div></body></html>\n';
   }
   function shareGuideFile() {
     const name = 'sod-guide.html', html = guideFileHtml();
