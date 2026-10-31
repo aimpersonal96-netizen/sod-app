@@ -1,12 +1,12 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.5.2) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.5.3) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="เวรหอนอน">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>ตารางเวรหอนอน หอฟ้าทะลายโจร</title>
@@ -399,7 +399,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.5.2';
+  const VERSION = '1.5.3';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -1020,7 +1020,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.5.2'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.5.3'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -1792,6 +1792,78 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
       '<div class="actions"><button type="button" class="btn" data-action="dlg-cancel">ปิด</button></div></form>';
     if (!dlg().open) dlg().showModal();
   }
+  // ---------- พิมพ์จากแอปบนหน้าจอโฮม iPhone (สั่งพิมพ์ตรงไม่ได้) → สร้างภาพแล้วให้เลือก "พิมพ์" ในแผ่นแชร์ ----------
+  const isStandalone = () => window.navigator.standalone === true || !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  function wrapText(x, text, maxW) {
+    const out = []; let line = '';
+    // ตัดคำที่ช่องว่าง (ลูกน้ำติดไปกับตัวเลขข้างหน้า เช่น "27, " ไม่ขึ้นบรรทัดใหม่ด้วย ",")
+    (String(text).match(/\S+\s*/g) || ['']).forEach((w) => { const t = line + w; if (x.measureText(t).width > maxW && line.trim()) { out.push(line.trim()); line = w; } else line = t; });
+    if (line.trim()) out.push(line.trim());
+    return out.length ? out : [''];
+  }
+  // ใบลงชื่อรับเงินเป็นภาพ A4 แนวตั้ง (150 dpi) เนื้อหาเดียวกับ receiptDoc
+  function receiptCanvas(p) {
+    const W = 1240, H = 1754, M = 80, rows = receiptRows(p), anySingle = rows.some((r) => r.singles), chg = monthInfo(view.ym).changes || [];
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.fillStyle = '#000'; x.textBaseline = 'middle';
+    const font = (w, s) => { x.font = w + ' ' + s + 'px ' + FONT; };
+    const text = (t, px, py, align) => { x.textAlign = align || 'left'; x.fillText(t, px, py); };
+    let y = M + 10;
+    font(700, 40); text('หลักฐานการจ่ายค่าตอบแทนเวรหอนอน', W / 2, y, 'center'); y += 50;
+    font(400, 26); text((state.dormName || '') + ' · ประจำเดือน' + ymLabel(view.ym), W / 2, y, 'center'); y += 50;
+    font(400, 21); wrapText(x, 'ได้รับเงินจากการเงิน ' + money(p.amount) + ' บาท · คืนที่มีเวร ' + p.nights + ' คืน · ต่อคืน ' + money(p.N) + ' บาท · ต่อครู 1 คน 1 คืน ' + money(p.X) + ' บาท', W - M * 2).forEach((l) => { text(l, M, y); y += 30; });
+    y += 10;
+    // ตาราง
+    const cols = [['ที่', 46, 'c'], ['ชื่อ-สกุล', 220, 'l'], ['จำนวนเวร\n(คืน)', 90, 'r']].concat(anySingle ? [['เวรเดี่ยว\n(×2)', 80, 'r']] : [])
+      .concat([['วันที่ขึ้นเวร', anySingle ? 190 : 270, 'l'], ['จำนวนเงิน\n(บาท)', 120, 'r'], ['ลงชื่อผู้รับเงิน', 190, 'c'], ['หมายเหตุ\n(วันที่โอน)', 144, 'c']]);
+    const xs = []; cols.reduce((a, col) => { xs.push(a); return a + col[1]; }, M);
+    const cell = (i, t, top, h, bold, head) => {
+      const w = cols[i][1], al = head ? 'c' : cols[i][2], lines = String(t).split('\n'); font(bold ? 700 : 400, head ? 17 : 20);
+      const wrapped = lines.flatMap((l) => wrapText(x, l, w - 14));
+      wrapped.forEach((l, k) => text(l, al === 'r' ? xs[i] + w - 8 : al === 'c' ? xs[i] + w / 2 : xs[i] + 8, top + h / 2 + (k - (wrapped.length - 1) / 2) * 24, al === 'r' ? 'right' : al === 'c' ? 'center' : 'left'));
+    };
+    const grid = (top, h) => { x.strokeStyle = '#000'; x.lineWidth = 1.5; x.strokeRect(M, top, W - M * 2, h); xs.slice(1).forEach((cx) => { x.beginPath(); x.moveTo(cx, top); x.lineTo(cx, top + h); x.stroke(); }); };
+    const headH = 64; grid(y, headH); cols.forEach((col, i) => cell(i, col[0], y, headH, true, true)); y += headH;
+    rows.forEach((r, i) => {
+      const vals = [i + 1, S.formalName(staffOf(r.name)), r.count].concat(anySingle ? [r.singles || '–'] : []).concat([dutyDates(r.name, true).join(', '), money(r.pay), '', '']);
+      font(400, 20); const need = Math.max(...vals.map((v, k) => wrapText(x, String(v), cols[k][1] - 14).length));
+      const h = Math.max(64, need * 24 + 20); grid(y, h); vals.forEach((v, k) => cell(k, v, y, h)); y += h;
+    });
+    const tot = ['', 'รวม', rows.reduce((a, r) => a + r.count, 0)].concat(anySingle ? [''] : []).concat(['', money(p.total), '', '']);
+    grid(y, 56); tot.forEach((v, k) => cell(k, v, y, 56, true)); y += 56 + 30;
+    font(700, 24); wrapText(x, 'รวมเป็นเงิน ' + money(p.total) + ' บาท (' + S.bahtText(p.total) + ')', W - M * 2).forEach((l) => { text(l, M, y); y += 32; });
+    font(400, 18); x.fillStyle = '#333';
+    const notes = (p.pending.length ? ['หมายเหตุ: มี ' + p.pending.length + ' คืนที่ครูไม่ครบ 2 คน ยอดที่จ่ายรวมจึงน้อยกว่ายอดที่ได้รับ'] : [])
+      .concat(['วิธีคำนวณ: ต่อคืน = ยอดที่ได้รับ ÷ จำนวนคืนที่มีเวร · ต่อครู 1 คน 1 คืน = ต่อคืน ÷ 2 · ค่าตอบแทน = ต่อครู 1 คน 1 คืน × จำนวนส่วน (เวรปกติ 1 ส่วน เวรเดี่ยว 2 ส่วน) ไม่ปัดเศษระหว่างคำนวณ แสดงถึงสตางค์']);
+    notes.forEach((n) => wrapText(x, n, W - M * 2).forEach((l) => { text(l, M, y); y += 26; }));
+    x.fillStyle = '#000';
+    // รายการเปลี่ยนเวร (ย่อให้พอดีหน้า)
+    const signH = 230, room = H - M - signH - y - 40;
+    if (chg.length && room > 80) {
+      y += 16; font(700, 22); text('รายการเปลี่ยนเวรหลังประกาศตาราง (' + chg.length + ' รายการ)', M, y); y += 34;
+      const maxLines = Math.floor((room - 50) / 26); font(400, 18);
+      chg.slice(0, maxLines).forEach((c2) => { text('• ' + be(c2.date) + ': ' + pairText(c2.from) + ' → ' + pairText(c2.to) + (c2.reason ? ' (' + c2.reason + ')' : ''), M, y); y += 26; });
+      if (chg.length > maxLines) { text('…และอีก ' + (chg.length - maxLines) + ' รายการ (ดูได้ในแอป แท็บสรุป)', M, y); y += 26; }
+    }
+    // ลงชื่อผู้จ่ายเงิน
+    let sy = Math.max(y + 50, H - M - signH); const sx = W - M - 300; font(400, 24);
+    const payer = state.payer.fullName ? (state.payer.prefix || '') + state.payer.fullName : '..................................................';
+    ['ลงชื่อ ................................................ ผู้จ่ายเงิน', '(' + payer + ')', 'หัวหน้า' + (state.dormName || ''), 'วันที่ ......... / ......... / .........'].forEach((l) => { text(l, sx, sy, 'center'); sy += 46; });
+    return c;
+  }
+  // แสดงภาพที่จะพิมพ์ + ปุ่มแชร์ (ในแผ่นแชร์ของ iPhone มี "พิมพ์" และ "บันทึกลงไฟล์")
+  function openPrintImage(kind) {
+    const c = kind === 'receipt' ? receiptCanvas(S.payroll(state, view.ym)) : posterCanvas(true);
+    const name = (kind === 'receipt' ? 'sod-receipt-' : 'sod-schedule-') + view.ym + '.png';
+    shareCache = { text: '', file: null, name, url: c.toDataURL('image/png') };
+    if (c.toBlob) c.toBlob((b) => { if (b && shareCache && shareCache.name === name) shareCache.file = new File([b], name, { type: 'image/png' }); }, 'image/png');
+    dlg().innerHTML = '<form method="dialog" data-form="printimg"><h3>' + (kind === 'receipt' ? 'พิมพ์ใบลงชื่อรับเงิน' : 'พิมพ์ตารางเวร') + ' · ' + ymLabel(view.ym) + '</h3>' +
+      '<p class="muted">แอปที่เปิดจากไอคอนหน้าจอโฮมของ iPhone สั่งพิมพ์ตรงไม่ได้ ระบบจึงทำเป็นภาพให้ · แตะ <b>แชร์เพื่อพิมพ์</b> แล้วเลือก <b>"พิมพ์"</b> (หรือ "บันทึกลงไฟล์" เพื่อเก็บไว้)</p>' +
+      '<img class="share-prev" src="' + shareCache.url + '" alt="ภาพสำหรับพิมพ์">' +
+      '<div class="stack"><button type="button" class="btn primary" data-action="share-print">แชร์เพื่อพิมพ์</button><button type="button" class="btn" data-action="save-img">บันทึกรูปลงเครื่อง</button></div>' +
+      '<div class="actions"><button type="button" class="btn" data-action="dlg-cancel">ปิด</button></div></form>';
+    if (!dlg().open) dlg().showModal();
+  }
   function saveImage() { const a = document.createElement('a'); a.href = shareCache.url; a.download = shareCache.name; document.body.appendChild(a); a.click(); a.remove(); }
   function copyText() {
     const done = () => toast('คัดลอกแล้ว ไปวางในกลุ่ม LINE ได้เลย');
@@ -1934,8 +2006,12 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
       case 'reopen-month':
         if (!confirm('เปิดเดือน' + ymLabel(view.ym) + 'อีกครั้ง? แก้ตารางได้ และถ้าประกาศแล้ว การเปลี่ยนจะถูกบันทึกต่อ (ระวังยอดไม่ตรงกับที่จ่ายไปแล้ว)')) break;
         delete state.months[view.ym].closedAt; commit(); break;
-      case 'print': document.body.classList.remove('print-receipt'); window.print(); break;
-      case 'print-receipt': render(); document.body.classList.add('print-receipt'); window.print(); break;
+      case 'print': if (isStandalone()) { openPrintImage('schedule'); break; } document.body.classList.remove('print-receipt'); window.print(); break;
+      case 'print-receipt': if (isStandalone()) { openPrintImage('receipt'); break; } render(); document.body.classList.add('print-receipt'); window.print(); break;
+      case 'share-print':
+        if (shareCache.file && navigator.canShare && navigator.canShare({ files: [shareCache.file] })) navigator.share({ files: [shareCache.file] }).catch(() => {});
+        else { saveImage(); toast('บันทึกรูปแล้ว เปิดในแอปรูปภาพแล้วกดแชร์ → พิมพ์'); }
+        break;
       case 'add-staff': {
         const nm = $('#nsName').value.trim(), g = $('#nsGender').value, grp = Number($('#nsGroup').value);
         if (!nm) { toast('กรอกชื่อเล่นก่อน'); break; }
