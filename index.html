@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.7.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.7.2) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -272,8 +272,16 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 
 /* มือถือ/แท็บเล็ต: แท็บกลายเป็นเมนูล่าง · หัวแอปจัดกึ่งกลางให้สมดุล */
 @media (max-width: 820px) {
-  .top { padding-top: calc(max(16px, env(safe-area-inset-top)) + 6px); padding-bottom: 52px; }
-  .hero-top + .hero-k { margin-top: 22px; }
+  /* iPhone (iOS 26) เบลอเนื้อหาที่อยู่ใต้แถบเวลาเลยขอบลงมาเล็กน้อย จึงเว้นจากขอบบนเพิ่ม ~28px ให้ทักทายพ้นส่วนที่เบลอ */
+  .top { padding-top: calc(max(16px, env(safe-area-inset-top)) + 28px); padding-bottom: 52px; }
+  /* แถวบนจัดสมมาตร: 📖 · 🌙 · กระดิ่ง แล้วคำทักทาย + เวอร์ชันกึ่งกลางเต็มบรรทัด */
+  .hero-top { display: grid; grid-template-columns: 44px 1fr 44px; grid-template-areas: "guide logo bell" "hello hello hello"; align-items: center; gap: 10px 8px; }
+  .hero-top .guide-btn { grid-area: guide; margin: 0; }
+  .hero-top .logo { grid-area: logo; justify-self: center; width: 52px; height: 52px; font-size: 1.55rem; }
+  .hero-top .bell:not(.guide-btn) { grid-area: bell; }
+  .hello { grid-area: hello; text-align: center; }
+  .hello h1 { font-size: 1.3rem; }
+  .hero-top + .hero-k { margin-top: 20px; }
   .hero-k { text-align: center; }
   .hero-big { justify-content: center; margin-bottom: 12px; }
   .hero-t { margin: 0 auto; justify-content: center; text-align: center; }
@@ -429,7 +437,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.7.1';
+  const VERSION = '1.7.2';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -1240,7 +1248,7 @@ button.btn[disabled] { opacity: .5; cursor: not-allowed; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.7.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.7.2'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
