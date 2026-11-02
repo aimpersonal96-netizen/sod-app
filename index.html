@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.8.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.9.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -110,6 +110,7 @@ h4.dhead { font-size: .82rem; color: var(--muted); margin: 8px 0 0; }
 .tag.tag-travel { background: #FFF1D6; color: #8A5200; }
 .tag.tag-travel button { color: #8A5200; }
 .tag.tag-errand { background: #FFE9A8; color: #7A5A00; } .tag.tag-errand button { color: #7A5A00; }
+.tag.tag-sick { background: #EAE3FA; color: #4B35A0; } .tag.tag-sick button { color: #4B35A0; }
 .tag.tag-red { background: var(--err-bg); color: var(--err); } .tag.tag-red button { color: var(--err); }
 /* เทอม / วันหยุด / จุดตั้งต้นเดิม (แท็บตั้งค่า) */
 .term-row { border-top: 1px solid var(--line-soft); padding: 12px 0; }
@@ -413,6 +414,24 @@ button.btn.st-red { background: var(--err-bg); color: var(--err); border-color: 
 button.btn.st-yellow { background: #FFF1B8; color: #7A5A00; border-color: #E9CF6A; }
 button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
 .c-red { color: var(--err); } .c-yellow { color: #8A6A00; }
+
+/* การ์ดค่าตอบแทนรายครู (กราฟขีด) */
+.only-print { display: none; }
+@media print { .only-print { display: block !important; } }
+.paycards { display: grid; gap: 12px; margin: 12px 0; }
+.pcard { border: 1.5px solid var(--line-soft); border-radius: 18px; padding: 12px 14px; background: var(--sheet, #fff); }
+.pc-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.pc-money { margin-left: auto; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pc-money small { font-size: .72rem; font-weight: 500; color: var(--muted); }
+.pc-bar { display: flex; height: 14px; margin: 10px 0 6px; border-radius: 999px; background: var(--na-bg); overflow: hidden; }
+.pc-bar i, .pc-legend i { display: inline-block; height: 100%; }
+.seg-w { background: #3E9A74; } .seg-h { background: #E8A33D; }
+.pc-legend i { width: 10px; height: 10px; border-radius: 3px; margin: 0 2px 0 8px; vertical-align: baseline; }
+.pc-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: .9rem; }
+.pc-alt { margin-top: 6px; font-size: .88rem; padding: 4px 10px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); }
+.pc-dates { margin-top: 6px; font-size: .78rem; }
+button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF0; }
+.c-purple { color: #4B35A0; }
 </style>
 </head>
 <body>
@@ -435,7 +454,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.8.0';
+  const VERSION = '1.9.1';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -499,6 +518,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
       months: {},                    // { 'yyyy-mm': { announcedAt, announced: {วันที่: [ชื่อ]}, changes: [{at, date, from, to, reason}], closedAt, pay: {mode, weekday, holiday} } } (pay.mode = วิธีจ่ายที่เลือกของเดือน ปิดเดือนแล้วเก็บอัตราด้วย)
       terms: [],                     // [{name, from, to, dayStart, dayGroup}] เทอม: คืนเวรแรก-คืนเวรสุดท้าย และเวรกลางวันเริ่มวัน dayStart เป็นกลุ่ม dayGroup (ปิดเทอม = ไม่มีเวร)
       holidays: {},                  // { วันที่: 'ชื่อวันหยุด' | null } เพิ่มวันหยุด (เช่น วันพระ วันหยุดชดเชย) หรือ null = ยกเลิกวันหยุดตายตัววันนั้น
+      sick: {},                      // { ชื่อ: [วันที่] } ป่วย (ปุ่มม่วง): ห้ามจัดเฉพาะวันที่ครูขอ ไม่มีคืนพักต่อให้
       errand: {},                    // { ชื่อ: [วันที่] } ติดธุระ (ปุ่มเหลือง): ตัวสร้างเลี่ยงก่อน เลี่ยงไม่ได้จัด/สลับได้ + เตือน
       travel: {},                    // { ชื่อ: [วันที่] } คืนกลับจากเดินทางราชการ: ตัวสร้างเลี่ยงก่อน เลี่ยงไม่ได้จัดได้ + เตือน
       payroll: {},                   // { 'yyyy-mm': ยอดการเงิน }
@@ -559,7 +579,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
     o.payer = Object.assign({ prefix: '', fullName: '' }, o.payer);
     o.single = o.single || {}; o.months = o.months || {}; o.confirmed = o.confirmed || {};
     o.pay = Object.assign({ mode: 'equal', weekday: 200, holiday: 420 }, o.pay);
-    o.terms = Array.isArray(o.terms) ? o.terms : []; o.holidays = o.holidays || {}; o.travel = o.travel || {}; o.errand = o.errand || {};
+    o.terms = Array.isArray(o.terms) ? o.terms : []; o.holidays = o.holidays || {}; o.travel = o.travel || {}; o.errand = o.errand || {}; o.sick = o.sick || {};
     if (o.version === undefined || o.version < SCHEMA) o.version = SCHEMA;
     return o;
   }
@@ -583,7 +603,13 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
   }
   // คืนวันหยุด (ใช้สมดุลเวรวันหยุด): คืนวันเสาร์ คืนวันอาทิตย์ และคืนวันหยุดนักขัตฤกษ์ (นับตามวันที่เริ่มเวร)
   const isHolidayNight = (state, d) => dow(d) === 6 || dow(d) === 0 || !!holidayName(state, d);
-  const onTravel = (state, name, d) => ((state.travel || {})[name] || []).includes(d);
+  // คืนพักหลังกลับจากราชการ: คืนถัดจากวันสุดท้ายของแต่ละช่วงติดราชการ (unavailable ติดกัน) เลี่ยงก่อน จัดได้ถ้าจำเป็น
+  const restNights = (state, name) => {
+    const u = ((state.unavailable || {})[name] || []);
+    return [...new Set(u.map((d) => addDays(d, 1)).filter((d) => !u.includes(d)))].sort();
+  };
+  // คืนที่ควรเลี่ยงเพราะเพิ่งกลับจากราชการ: คืนพักอัตโนมัติ + รายการ travel แบบเดิม (ข้อมูลเก่า)
+  const onTravel = (state, name, d) => ((state.travel || {})[name] || []).includes(d) || ((state.unavailable || {})[name] || []).includes(addDays(d, -1)) && !((state.unavailable || {})[name] || []).includes(d);
   const onErrand = (state, name, d) => ((state.errand || {})[name] || []).includes(d);
   // คืนที่มีเวรล่าสุดก่อนคืน d (กระโดดข้ามช่วงงดเวรทั้งช่วง ไม่จำกัดความยาว) ใช้ null ถ้าไม่มี
   // ข้ามทั้งช่วงงดเวร (noDuty) และช่วงปิดเทอม (ระหว่างเทอม) ไปหาคืนเวรจริงล่าสุด
@@ -605,6 +631,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
     if (grp === dayGroup(state, d)) return 'เวรกลางวันกลุ่ม ' + grp + ' วันนี้';
     if (grp === dayGroup(state, addDays(d, 1))) return 'เวรกลางวันกลุ่ม ' + grp + ' เช้าวันถัดไป';
     if (withUnavailable !== false && ((state.unavailable || {})[name] || []).includes(d)) return 'แจ้งไม่ว่าง';
+    if (withUnavailable !== false && ((state.sick || {})[name] || []).includes(d)) return 'ป่วย';
     return null;
   }
   const eligible = (state, d, g, withUnavailable) =>
@@ -637,6 +664,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
         if (grp === dayGroup(state, d)) add('B4', 'error', d, [n], 'ครู' + n + ' เวรกลางวันกลุ่ม ' + grp + ' วันนี้ ชนเวรนอน (รวม 24 ชม.)');
         if (grp === dayGroup(state, addDays(d, 1))) add('B4', 'error', d, [n], 'ครู' + n + ' เวรกลางวันกลุ่ม ' + grp + ' เช้าวันถัดไป ต่อจากเวรนอน (รวม 24 ชม.)');
         if (((state.unavailable || {})[n] || []).includes(d)) add('U', 'error', d, [n], 'ครู' + n + ' แจ้งไม่ว่างคืนนี้');
+        if (((state.sick || {})[n] || []).includes(d)) add('U', 'error', d, [n], 'ครู' + n + ' ป่วยคืนนี้');
         if (onTravel(state, n, d)) add('R', 'warn', d, [n], 'ครู' + n + ' กลับจากราชการคืนนี้ ควรได้พัก (จัดได้ถ้าจำเป็น)');
         if (onErrand(state, n, d)) add('R', 'warn', d, [n], 'ครู' + n + ' ติดธุระคืนนี้ (จัดหรือสลับได้ถ้าจำเป็น)');
         if ((sched[addDays(d, -1)] || []).includes(n)) add('N', 'warn', d, [n], 'ครู' + n + ' ขึ้นเวรติดกัน (เมื่อคืนและคืนนี้)');
@@ -895,7 +923,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
     const st = JSON.parse(JSON.stringify(state));
     st.staff.forEach((s) => { if (s.name === from) s.name = to; });
     Object.keys(st.schedule).forEach((d) => { st.schedule[d] = st.schedule[d].map((n) => (n === from ? to : n)); });
-    ['unavailable', 'travel', 'errand'].forEach((k) => { if (st[k] && st[k][from]) { st[k][to] = st[k][from]; delete st[k][from]; } });
+    ['unavailable', 'sick', 'travel', 'errand'].forEach((k) => { if (st[k] && st[k][from]) { st[k][to] = st[k][from]; delete st[k][from]; } });
     if (from in st.dayGroups.of) { st.dayGroups.of[to] = st.dayGroups.of[from]; delete st.dayGroups.of[from]; }
     const swap = (ns) => (ns || []).map((n) => (n === from ? to : n));
     Object.values(st.months || {}).forEach((m) => {   // ตารางที่ประกาศ และบันทึกการเปลี่ยนเวร ใช้ชื่อใหม่ด้วย
@@ -1086,7 +1114,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
 
   return { VERSION, SCHEMA, isSupportedVersion, migrate, THAI_DOW, THAI_MONTH, SHORT_MONTH, GENDER_LABEL, GENDER_SHORT,
     parse, fmt, addDays, diffDays, dow, range, isIso, monthOf, monthRange, addMonth,
-    defaultState, activeStaff, payConfig, confirmable, lineMessage, termOf, termOfMonth, holidayName, isHolidayNight, onTravel, onErrand, fairness, FIXED_HOLIDAYS, isSingle, nightGender, scheduleDiff, renameStaff, staffUsage, formalName, bahtText, genderOf, pairGender, dayGroup, dayMembers, isDutyNight, excludedReason, eligible,
+    defaultState, activeStaff, payConfig, confirmable, lineMessage, termOf, termOfMonth, holidayName, isHolidayNight, onTravel, onErrand, restNights, fairness, FIXED_HOLIDAYS, isSingle, nightGender, scheduleDiff, renameStaff, staffUsage, formalName, bahtText, genderOf, pairGender, dayGroup, dayMembers, isDutyNight, excludedReason, eligible,
     validate, monthStats, payroll, planGenders, generate, capacityWarnings, explainNight, swapTeachers,
     summarizeState, backupFileName, compareBackup, hashString, pushHistory,
     b64encodeUtf8, b64decodeUtf8, GhError, ghValidate, ghGet, ghPut };
@@ -1130,7 +1158,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
   <h2 id="g-month">3. งานประจำเดือน (เช็กลิสต์)</h2>
   <h3>ก่อนเดือนเริ่ม</h3>
   <ol>
-    <li>แท็บ <b>ครู</b>: กรอก<b>วันไม่ว่าง</b> (ห้ามจัด) และ<b>คืนกลับจากราชการ</b> (ควรได้พัก ระบบเลี่ยงให้ก่อน) ดู "ผลกระทบ" ถ้าขึ้น ✖ แปลว่าคืนนั้นจัดไม่ได้ ต้องพิจารณาเอง</li>
+    <li>แท็บ <b>ครู</b>: การ์ดครูแต่ละคนมีปุ่ม <b>ติดราชการ</b> (แดง: กรอกวันไปและวันกลับมาถึง ห้ามจัดตลอดช่วง แล้วระบบเว้นให้พักอีก 1 คืน เลี่ยงก่อน) <b>ป่วย</b> (ม่วง: ห้ามจัดเฉพาะวันที่ครูขอ ไม่เว้นคืนพักต่อให้) และ <b>ติดธุระ</b> (เหลือง: เลี่ยงก่อน จัดหรือสลับได้ถ้าจำเป็น) · ปุ่ม <b>ย้าย</b> ใช้ตอนครูย้ายหอหรือย้ายโรงเรียน ดู "ผลกระทบ" ถ้าขึ้น ✖ แปลว่าคืนนั้นจัดไม่ได้ ต้องพิจารณาเอง</li>
     <li><b>จัดเดือนก่อนหน้าให้เสร็จก่อน</b> (เพื่อต่อชุดชาย/หญิงข้ามเดือนให้ถูก)</li>
     <li>แท็บ <b>ตาราง</b> → ปุ่ม <b>สร้างตาราง</b> (กดซ้ำ = ลองแบบอื่น) · คืนที่ล็อก <span class="ui-chip">🔒</span> เวรเดี่ยว และคืนที่ยืนยันแล้ว <span class="ui-chip">✔</span> จะไม่ถูกเปลี่ยน</li>
     <li>คืนที่ขึ้น "รอหัวหน้าหอ" หรือสีแดง → แตะคืนนั้นเพื่อเลือกครูเอง · ใช้ <b>สลับครู</b> เพื่อแลกครูระหว่าง 2 คืน</li>
@@ -1170,7 +1198,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
         <tr class="row-red"><td><span class="badge-code">B3</span></td><td>คืนแรกของเดือนต้องสลับจากคืนสุดท้ายของเดือนก่อน</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
         <tr class="row-red"><td><span class="badge-code">B4</span></td><td>ห้ามอยู่เวรนอนติดกับเวรกลางวันของตัวเอง (วันเดียวกัน หรือเช้าวันถัดไป) เพราะรวมแล้วเกิน 24 ชั่วโมง</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
         <tr class="row-red"><td><span class="badge-code">U</span></td><td>ครูอยู่เวรในวันที่แจ้งไม่ว่าง</td><td style="text-align: center;"><span class="badge-red">แดง</span></td></tr>
-        <tr class="row-yellow"><td><span class="badge-code">R</span></td><td>ครูอยู่เวรในคืนกลับจากราชการ (ควรได้พัก จัดได้ถ้าจำเป็น)</td><td style="text-align: center;"><span class="badge-yellow">เหลือง</span></td></tr>
+        <tr class="row-yellow"><td><span class="badge-code">R</span></td><td>ครูอยู่เวรในคืนพักหลังกลับจากราชการ หรือคืนติดธุระ (ควรเลี่ยง จัดได้ถ้าจำเป็น)</td><td style="text-align: center;"><span class="badge-yellow">เหลือง</span></td></tr>
         <tr class="row-yellow"><td><span class="badge-code">N</span></td><td>ครูคนเดียวอยู่เวร 2 คืนติดกัน</td><td style="text-align: center;"><span class="badge-yellow">เหลือง</span></td></tr>
         <tr class="row-yellow"><td><span class="badge-code">P</span></td><td>คืนที่ยังไม่มีครู/ไม่ครบ 2 คน ("รอหัวหน้าหอ")</td><td style="text-align: center;"><span class="badge-yellow">เหลือง</span></td></tr>
       </tbody>
@@ -1260,7 +1288,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
   <ul>
     <li>เวร 18:00–07:00 น. คืนละ 2 คน เพศเดียวกัน และสลับชุดชาย/หญิงทุกคืน (ต่อเนื่องข้ามเดือน)</li>
     <li>ไม่จัดเวรนอนติดกับเวรกลางวันของตัวเอง (วันเดียวกัน หรือเช้าวันถัดไป) เพื่อไม่ให้ทำงานเกิน 24 ชั่วโมง</li>
-    <li>ไม่จัดในวันที่แจ้งไม่ว่าง · คืนที่กลับจากราชการระบบพยายามให้ได้พักก่อน</li>
+    <li>ไม่จัดในวันที่ติดราชการ · คืนหลังกลับจากราชการและคืนติดธุระระบบพยายามเลี่ยงให้ก่อน</li>
   </ul>
 
   <h3>ความเป็นธรรม</h3>
@@ -1356,7 +1384,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.8.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.9.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -1367,7 +1395,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
     st.dayGroups = Object.assign({}, base.dayGroups, m.dayGroups);
     st.dayGroups.of = Object.assign({}, base.dayGroups.of, (m.dayGroups || {}).of);
     if (!Array.isArray(st.dayGroups.anchors) || !st.dayGroups.anchors.length) st.dayGroups.anchors = base.dayGroups.anchors.slice();
-    ['unavailable', 'schedule', 'locked', 'payroll'].forEach((k) => { st[k] = st[k] || {}; });
+    ['unavailable', 'sick', 'schedule', 'locked', 'payroll'].forEach((k) => { st[k] = st[k] || {}; });
     st.noDuty = st.noDuty || [];
     st.payer = Object.assign({ prefix: '', fullName: '' }, st.payer);
     st.single = st.single || {}; st.months = st.months || {}; st.confirmed = st.confirmed || {};
@@ -1714,6 +1742,16 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
       (anySingle ? '<td class="num">' + (r.singles || '–') + '</td>' : '') + '<td class="num">' + r.confirmedNights + '</td>' +
       '<td class="muted">' + (dutyDates(r.name).join(', ') || '–') + '</td><td class="num">' + money(r.confirmedPay) + '</td><td class="num">' + money(r.pay) + '</td></tr>').join('');
     const sum = (k) => p.rows.reduce((a, r) => a + r[k], 0);
+    // การ์ดรายครู: กราฟขีดจำนวนเวร (คืนธรรมดา/คืนวันหยุด) + เงินคร่าวๆ ตามระเบียบการเงิน (คิดได้เลยแม้ยังไม่ได้กรอกยอดการเงิน)
+    const shown = p.rows.filter((r) => r.count > 0 || r.byRate > 0), maxN = Math.max(1, ...shown.map((r) => r.count));
+    const payCards = shown.length ? '<div class="paycards noprint">' + shown.map((r) => {
+      const wk = r.weekdayNights, hl = r.holidayNights, other = p.mode === 'equal' && r.pay !== null && Math.abs(r.pay - r.byRate) > 0.004;
+      return '<div class="pcard"><div class="pc-head"><span class="chip" style="' + chipStyle(r.name) + '">ครู' + esc(r.name) + '</span>' + gtag(r.gender) + '<span class="pc-money"><small>ประมาณ</small> ' + money(r.byRate) + ' <small>บาท</small></span></div>' +
+        '<div class="pc-bar" role="img" aria-label="เวร ' + r.count + ' คืน (ธรรมดา ' + wk + ' หยุด ' + hl + ')"><i class="seg-w" style="width:' + (wk / maxN * 100) + '%"></i><i class="seg-h" style="width:' + (hl / maxN * 100) + '%"></i></div>' +
+        '<div class="pc-meta"><b>' + r.count + ' คืน</b><span class="muted">ธรรมดา ' + wk + ' · หยุด ' + hl + (r.singles ? ' · เดี่ยว ' + r.singles : '') + ' · ยืนยันแล้ว ' + r.confirmedNights + '</span></div>' +
+        (other ? '<div class="pc-alt">จ่ายตามมติหอ (' + modeName(p.mode) + '): <b>' + money(r.pay) + '</b> บาท</div>' : '') +
+        '<div class="pc-dates muted">' + (dutyDates(r.name).join(', ') || '–') + '</div></div>';
+    }).join('') + '</div><p class="muted noprint pc-legend"><i class="seg-w"></i> คืนธรรมดา <i class="seg-h"></i> คืนวันหยุด · ความยาวขีดเทียบกับครูที่ขึ้นเวรมากสุดในเดือน · "ประมาณ" = ตามอัตราระเบียบการเงิน (' + p.rates.weekday + ' / ' + p.rates.holiday + ' บาท/คืน) ยอดจริงขึ้นกับการเงินโอนมา</p>' : '';
     return '<div class="card"><h2>ค่าตอบแทนเดือน' + ymLabel(view.ym) + '</h2>' +
       '<h3 class="sub">ตามระเบียบการเงิน (คำนวณล่วงหน้า)</h3>' +
       '<div class="kpis"><div><span>ทั้งเดือนตามตาราง</span><b class="big">' + money(p.expected) + '</b></div>' +
@@ -1727,7 +1765,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
       '<div class="paymode"><h3 class="sub" style="margin-top:0">วิธีจ่ายเดือนนี้ (ตามมติหอ)</h3><div class="col">' + modeOpts('paymode', p.mode, p.fixed, pe, pr) + '</div>' +
       '<p class="muted" style="margin:6px 0 0">' + (p.fixed ? '🔒 เดือนนี้ปิดแล้ว จ่ายแบบ' + modeName(p.mode) + ' (เปิดเดือนอีกครั้งถ้าต้องการเปลี่ยน)' : 'แต่ละเดือนเลือกแยกกัน และยืนยันอีกครั้งตอนปิดเดือน · หารเท่ากัน = ยอดที่ได้รับ ÷ จำนวนคืน ÷ 2') + '</p></div>' +
       (p.pending.length ? '<div class="banner warn"><strong>ยังมี ' + p.pending.length + ' คืนที่ไม่ครบ 2 คน</strong><span class="muted">' + (p.mode === 'rate' ? 'คืนนั้นคิดเงินเฉพาะครูที่มีชื่อ' : 'ยอดรวมที่จ่ายจะน้อยกว่ายอดการเงิน') + ' ตรวจที่แท็บตารางเวร</span></div>' : '') +
-      '<div class="tablewrap"><table><thead><tr><th>ครู</th><th class="num">เวร (คืน)</th>' + (anySingle ? '<th class="num">เวรเดี่ยว</th>' : '') + '<th class="num">ยืนยันแล้ว</th><th>วันที่ขึ้นเวร</th><th class="num">สะสมตามระเบียบ</th><th class="num">ค่าตอบแทน (' + modeName(p.mode) + ')</th></tr></thead><tbody>' + rows + '</tbody>' +
+      payCards + '<div class="tablewrap only-print"><table><thead><tr><th>ครู</th><th class="num">เวร (คืน)</th>' + (anySingle ? '<th class="num">เวรเดี่ยว</th>' : '') + '<th class="num">ยืนยันแล้ว</th><th>วันที่ขึ้นเวร</th><th class="num">สะสมตามระเบียบ</th><th class="num">ค่าตอบแทน (' + modeName(p.mode) + ')</th></tr></thead><tbody>' + rows + '</tbody>' +
       '<tfoot><tr><td>รวม</td><td class="num">' + sum('count') + (sum('holidayNights') ? ' <span class="muted">(หยุด ' + sum('holidayNights') + ')</span>' : '') + '</td>' + (anySingle ? '<td></td>' : '') + '<td class="num">' + sum('confirmedNights') + '</td><td></td><td class="num">' + money(p.confirmedTotal) + '</td><td class="num">' + money(p.total) + '</td></tr></tfoot></table></div>' +
       '<p class="muted">' + payNote(p) + ' · นับเวรตามวันที่เริ่มเวร 18:00 · นับตามครูที่ขึ้นเวรจริงในตารางปัจจุบัน</p>' +
       '<div class="row noprint"><button class="btn" data-action="export-pay">ส่งออก CSV</button><button class="btn" data-action="print">พิมพ์ / PDF</button></div></div>' +
@@ -1792,15 +1830,16 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
   // kind = 'unavailable' (ติดราชการ/ไม่ว่าง: ห้ามจัด) · 'errand' (ติดธุระ) · 'travel' (คืนกลับจากราชการ) สองแบบหลังเลี่ยงก่อน จัดได้ถ้าจำเป็น
   function dateChips(name, kind) {
     const list = ((state[kind] || {})[name] || []).slice().sort();
-    return '<div class="dbox" data-kind="' + kind + '"><div class="chips-inline">' + (list.length ? list.map((d) => '<span class="tag' + ({ travel: ' tag-travel', errand: ' tag-errand', unavailable: ' tag-red' }[kind] || '') + '">' + be(d) + '<button data-action="del-date" data-name="' + esc(name) + '" data-date="' + d + '" aria-label="ลบ ' + be(d) + '">×</button></span>').join('') : '<span class="muted">ไม่มี</span>') + '</div>' +
-      '<div class="row"><label class="f">จากวันที่<input type="date" data-role="from"></label><label class="f">ถึงวันที่ (ถ้าเป็นช่วง)<input type="date" data-role="to"></label>' +
+    return '<div class="dbox" data-kind="' + kind + '"><div class="chips-inline">' + (list.length ? list.map((d) => '<span class="tag' + ({ travel: ' tag-travel', errand: ' tag-errand', sick: ' tag-sick', unavailable: ' tag-red' }[kind] || '') + '">' + be(d) + '<button data-action="del-date" data-name="' + esc(name) + '" data-date="' + d + '" aria-label="ลบ ' + be(d) + '">×</button></span>').join('') : '<span class="muted">ไม่มี</span>') + '</div>' +
+      '<div class="row"><label class="f">' + (kind === 'unavailable' ? 'วันที่ไป (ติดราชการ)' : 'จากวันที่') + '<input type="date" data-role="from"></label><label class="f">' + (kind === 'unavailable' ? 'วันที่กลับมาถึง' : 'ถึงวันที่ (ถ้าเป็นช่วง)') + '<input type="date" data-role="to"></label>' +
       '<button class="btn" data-action="add-date" data-name="' + esc(name) + '">เพิ่ม</button></div></div>';
   }
   // การ์ดครูรายคน: ชื่อ · เวรกลางวัน · ปุ่มแก้ไข / ย้าย / ติดราชการ (แดง) / ติดธุระ (เหลือง) / กลับจากราชการ
   const STATUS_KINDS = [
-    ['unavailable', 'ติดราชการ', 'st-red', 'ห้ามจัดเวรคืนที่เลือก (เปลี่ยนยาก ถ้าจัดเองจะขึ้นแดงและเตือนก่อนบันทึก)'],
+    ['unavailable', 'ติดราชการ', 'st-red', 'กรอกวันที่ไป และวันที่กลับมาถึง: ห้ามจัดเวรตั้งแต่วันไปถึงวันกลับ (ถ้าจัดเองจะขึ้นแดงและเตือนก่อนบันทึก) และระบบเว้น 1 คืนหลังวันกลับให้พัก (เลี่ยงก่อน จัดได้ถ้าจำเป็น ขึ้นเตือนเหลือง)'],
+    ['sick', 'ป่วย', 'st-purple', 'ครูขอมาถึงวันไหน กรอกถึงวันนั้น: ห้ามจัดเฉพาะช่วงที่กรอก ไม่เว้นคืนพักต่อให้ (ยังไม่หาย ก็กรอกต่อเพิ่ม) ถ้าจัดเองจะขึ้นแดงและเตือนก่อนบันทึก'],
     ['errand', 'ติดธุระ', 'st-yellow', 'ตัวสร้างเลี่ยงก่อน ถ้าเลี่ยงไม่ได้จัดหรือสลับได้ และขึ้นเตือนเหลือง'],
-    ['travel', 'กลับจากราชการ', 'st-gray', 'คืนกลับจากเดินทางราชการ ควรได้พัก ตัวสร้างเลี่ยงก่อน ถ้าเลี่ยงไม่ได้จัดได้ และขึ้นเตือนเหลือง']
+    ['travel', 'กลับจากราชการ (ข้อมูลเดิม)', 'st-gray', 'รายการที่กรอกไว้ก่อน 1.9.0 ยังใช้ได้ ลบได้ ส่วนใหม่ให้กรอกที่ติดราชการ']
   ];
   const MOVE_LABEL = { dorm: 'ย้ายหอ', school: 'ย้ายโรงเรียน' };
   function teacherCard(s, i) {
@@ -1815,7 +1854,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
     const btn = (what, cls, label) => '<button class="btn sm ' + cls + (open === what ? ' on' : '') + '" data-action="t-panel" data-name="' + nm + '" data-what="' + what + '" aria-expanded="' + (open === what) + '">' + label + '</button>';
     const actions = '<div class="tc-actions">' + btn('edit', '', 'แก้ไข') + btn('move', '', 'ย้าย ▾') +
       (out ? '<button class="btn sm" data-action="t-return" data-name="' + nm + '">กลับเข้าเวร</button>'
-        : STATUS_KINDS.map(([k, label, cls]) => { const n = ((state[k] || {})[s.name] || []).length; return btn(k, cls, label + (n ? ' · ' + n : '')); }).join('')) + '</div>';
+        : STATUS_KINDS.map(([k, label, cls]) => { const n = ((state[k] || {})[s.name] || []).length; return k === 'travel' && !n ? '' : btn(k, cls, label + (n ? ' · ' + n : '')); }).join('')) + '</div>';
     let panel = '';
     if (open === 'edit') {
       panel = '<div class="tc-panel"><div class="staff-grid"><label class="f">ชื่อเล่น (ใช้ในตาราง)<input type="text" data-staff="name" data-i="' + i + '" value="' + nm + '" autocomplete="off"></label>' +
@@ -1830,7 +1869,9 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
         (used ? '<p class="muted" style="margin:8px 0 0">ลบไม่ได้ เพราะครูคนนี้เคยขึ้นเวรแล้ว (ลบได้เฉพาะครูที่ยังไม่เคยขึ้นเวร)</p>' : '') + '</div>';
     } else if (open && !out) {
       const k = STATUS_KINDS.find((x) => x[0] === open);
-      if (k) panel = '<div class="tc-panel"><p class="muted" style="margin:0 0 6px">' + k[1] + ': ' + k[3] + '</p>' + dateChips(s.name, open) + '</div>';
+      const rest = open === 'unavailable' ? S.restNights(state, s.name) : [];
+      if (k) panel = '<div class="tc-panel"><p class="muted" style="margin:0 0 6px">' + k[1] + ': ' + k[3] + '</p>' + dateChips(s.name, open) +
+        (rest.length ? '<p class="muted" style="margin:8px 0 0">คืนที่เว้นให้พักหลังกลับ (เลี่ยงก่อน): ' + rest.map(be).join(', ') + '</p>' : '') + '</div>';
     }
     return '<div class="tcard' + (out ? ' inactive' : '') + '" data-name="' + nm + '">' + head + actions + panel + '</div>';
   }
@@ -1840,7 +1881,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
     const idx = state.staff.map((s, i) => [s, i]);
     const rows = idx.filter(([s]) => s.active !== false).concat(idx.filter(([s]) => s.active === false)).map(([s, i]) => teacherCard(s, i)).join('');
     return '<div class="card"><h2>รายชื่อครู (' + S.activeStaff(state).length + ' คนที่อยู่เวร)</h2>' +
-      '<p class="muted">ชื่อจริงเก็บเฉพาะในเครื่องนี้ ไฟล์สำรอง และ repo ข้อมูลส่วนตัว (ถ้าเปิดซิงก์) <strong>ไม่อยู่ในตัวแอปที่เผยแพร่</strong> · ครูแจ้งมา หัวหน้าหอกรอกที่ปุ่มสีบนการ์ด ไม่ต้องมีใบ: <b class="c-red">ติดราชการ</b> = ห้ามจัด · <b class="c-yellow">ติดธุระ</b> และ <b>กลับจากราชการ</b> = เลี่ยงก่อน ถ้าจำเป็นจัดหรือสลับได้ + เตือนเหลือง</p>' +
+      '<p class="muted">ชื่อจริงเก็บเฉพาะในเครื่องนี้ ไฟล์สำรอง และ repo ข้อมูลส่วนตัว (ถ้าเปิดซิงก์) <strong>ไม่อยู่ในตัวแอปที่เผยแพร่</strong> · ครูแจ้งมา หัวหน้าหอกรอกที่ปุ่มสีบนการ์ด ไม่ต้องมีใบ: <b class="c-red">ติดราชการ</b> = ห้ามจัดตั้งแต่วันไปถึงวันกลับ แล้วเว้นให้พักอีก 1 คืน (เลี่ยงก่อน) · <b class="c-purple">ป่วย</b> = ห้ามจัดเฉพาะช่วงที่ครูขอ ไม่เว้นคืนพัก · <b class="c-yellow">ติดธุระ</b> = เลี่ยงก่อน ถ้าจำเป็นจัดหรือสลับได้ + เตือนเหลือง</p>' +
       (rows ? '<div class="tcards">' + rows + '</div>' : '<div class="banner warn"><strong>ยังไม่มีรายชื่อครู</strong><span>เพิ่มด้านล่าง หรือนำเข้าไฟล์สำรอง/ดึงจาก GitHub ที่แท็บตั้งค่า</span></div>') +
       '<div class="staff-add"><h3>เพิ่มครู</h3><div class="row"><label class="f">ชื่อเล่น<input type="text" id="nsName" autocomplete="off"></label>' +
       '<label class="f">ชุด<select id="nsGender">' + opt('M', 'ชาย (ชช)', '') + opt('F', 'หญิง (ญญ)', '') + '</select></label>' +
@@ -2512,7 +2553,7 @@ button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
         const s = state.staff[Number(el.dataset.i)];
         if (!s || S.staffUsage(state, s.name)) break;
         if (!confirm('ลบครู' + s.name + ' ออกจากรายชื่อหรือไม่?')) break;
-        state.staff.splice(Number(el.dataset.i), 1); delete state.dayGroups.of[s.name]; ['unavailable', 'travel', 'errand'].forEach((k) => { delete state[k][s.name]; }); view.tpanel = null; commit(); break;
+        state.staff.splice(Number(el.dataset.i), 1); delete state.dayGroups.of[s.name]; ['unavailable', 'sick', 'travel', 'errand'].forEach((k) => { delete state[k][s.name]; }); view.tpanel = null; commit(); break;
       }
       case 'export-csv': {
         const { start, end } = monthRange();
