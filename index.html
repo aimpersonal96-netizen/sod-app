@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.9.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.10.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -415,21 +415,32 @@ button.btn.st-yellow { background: #FFF1B8; color: #7A5A00; border-color: #E9CF6
 button.btn.st-gray { background: var(--na-bg); color: #4B5A54; }
 .c-red { color: var(--err); } .c-yellow { color: #8A6A00; }
 
-/* การ์ดค่าตอบแทนรายครู (กราฟขีด) */
+/* การ์ดค่าตอบแทนรายครู: ขีดรายคืน สีตามครู */
 .only-print { display: none; }
 @media print { .only-print { display: block !important; } }
-.paycards { display: grid; gap: 12px; margin: 12px 0; }
-.pcard { border: 1.5px solid var(--line-soft); border-radius: 18px; padding: 12px 14px; background: var(--sheet, #fff); }
-.pc-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-.pc-money { margin-left: auto; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.paycards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin: 14px 0; }
+.pcard { border: 1.5px solid color-mix(in srgb, var(--tc, #3E9A74) 35%, #ffffff); border-radius: 22px; padding: 16px 16px 14px; background: linear-gradient(160deg, color-mix(in srgb, var(--tc, #3E9A74) 12%, #ffffff), var(--sheet, #ffffff) 55%); box-shadow: 0 4px 14px color-mix(in srgb, var(--tc, #3E9A74) 14%, transparent); }
+.pc-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.chip.chip-lg { font-size: 1.2rem; padding: 4px 16px; font-weight: 700; }
+.pc-money { margin-left: auto; text-align: right; line-height: 1.1; }
+.pc-money b { font-size: 1.55rem; font-variant-numeric: tabular-nums; }
 .pc-money small { font-size: .72rem; font-weight: 500; color: var(--muted); }
-.pc-bar { display: flex; height: 14px; margin: 10px 0 6px; border-radius: 999px; background: var(--na-bg); overflow: hidden; }
-.pc-bar i, .pc-legend i { display: inline-block; height: 100%; }
-.seg-w { background: #3E9A74; } .seg-h { background: #E8A33D; }
-.pc-legend i { width: 10px; height: 10px; border-radius: 3px; margin: 0 2px 0 8px; vertical-align: baseline; }
-.pc-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: .9rem; }
-.pc-alt { margin-top: 6px; font-size: .88rem; padding: 4px 10px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); }
-.pc-dates { margin-top: 6px; font-size: .78rem; }
+.pc-bar { margin: 14px 0 10px; height: 22px; }
+.pc-blocks { display: flex; gap: 4px; height: 100%; }
+.blk { flex: 1 1 0; min-width: 0; border-radius: 7px; background: color-mix(in srgb, var(--tc, #3E9A74) 22%, #ffffff); position: relative; display: inline-block; }
+.blk.done { background: var(--tc, #3E9A74); }
+.blk.wait { background: transparent; box-shadow: inset 0 0 0 2px var(--tc, #3E9A74); }
+.blk.hol::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: 3px; height: 4px; border-radius: 2px; background: #F2A83B; box-shadow: 0 0 0 1px #ffffffcc; }
+.pc-meta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; font-size: .95rem; }
+.pc-meta > span > b:first-child { font-size: 1.15rem; }
+.pc-total { color: var(--muted); font-size: .88rem; } .pc-total b { color: inherit; font-variant-numeric: tabular-nums; }
+.pc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.pc-tags span { padding: 2px 10px; border-radius: 999px; font-size: .78rem; background: var(--na-bg); color: #3F4D47; }
+.pc-tags .cum { background: color-mix(in srgb, var(--tc, #3E9A74) 18%, #ffffff); font-weight: 600; }
+.pc-tags .warn { background: var(--warn-bg); color: var(--warn); }
+.pc-alt { margin-top: 8px; font-size: .88rem; padding: 4px 10px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); }
+.pc-dates { margin-top: 8px; font-size: .78rem; }
+.pc-legend .blk { width: 14px; height: 14px; flex: none; margin: 0 4px 0 10px; vertical-align: -2px; --tc: #3E9A74; }
 button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF0; }
 .c-purple { color: #4B35A0; }
 </style>
@@ -454,7 +465,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.9.1';
+  const VERSION = '1.10.0';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -1384,7 +1395,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.9.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.10.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -1742,16 +1753,25 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
       (anySingle ? '<td class="num">' + (r.singles || '–') + '</td>' : '') + '<td class="num">' + r.confirmedNights + '</td>' +
       '<td class="muted">' + (dutyDates(r.name).join(', ') || '–') + '</td><td class="num">' + money(r.confirmedPay) + '</td><td class="num">' + money(r.pay) + '</td></tr>').join('');
     const sum = (k) => p.rows.reduce((a, r) => a + r[k], 0);
-    // การ์ดรายครู: กราฟขีดจำนวนเวร (คืนธรรมดา/คืนวันหยุด) + เงินคร่าวๆ ตามระเบียบการเงิน (คิดได้เลยแม้ยังไม่ได้กรอกยอดการเงิน)
+    // การ์ดรายครู: ขีดเป็นช่องรายคืน (เข้ม = หัวหน้าหอกดยืนยันแล้ว · ขอบประ = ผ่านแล้วรอยืนยัน · อ่อน = ยังไม่ถึง · ขีดส้ม = คืนวันหยุด) + เงินที่ยืนยันแล้ว (ตามคนที่อยู่เวรจริง) + สมุดสะสมเทอม
+    const f = S.fairness(state, view.ym), fr = {}; f.rows.forEach((r) => { fr[r.name] = r; });
+    const upto = confirmUpto(), mr = monthRange();
+    const nightsOf = (n) => S.range(mr.start, mr.end).filter((d) => S.isDutyNight(state, d) && (state.schedule[d] || []).includes(n));
     const shown = p.rows.filter((r) => r.count > 0 || r.byRate > 0), maxN = Math.max(1, ...shown.map((r) => r.count));
     const payCards = shown.length ? '<div class="paycards noprint">' + shown.map((r) => {
-      const wk = r.weekdayNights, hl = r.holidayNights, other = p.mode === 'equal' && r.pay !== null && Math.abs(r.pay - r.byRate) > 0.004;
-      return '<div class="pcard"><div class="pc-head"><span class="chip" style="' + chipStyle(r.name) + '">ครู' + esc(r.name) + '</span>' + gtag(r.gender) + '<span class="pc-money"><small>ประมาณ</small> ' + money(r.byRate) + ' <small>บาท</small></span></div>' +
-        '<div class="pc-bar" role="img" aria-label="เวร ' + r.count + ' คืน (ธรรมดา ' + wk + ' หยุด ' + hl + ')"><i class="seg-w" style="width:' + (wk / maxN * 100) + '%"></i><i class="seg-h" style="width:' + (hl / maxN * 100) + '%"></i></div>' +
-        '<div class="pc-meta"><b>' + r.count + ' คืน</b><span class="muted">ธรรมดา ' + wk + ' · หยุด ' + hl + (r.singles ? ' · เดี่ยว ' + r.singles : '') + ' · ยืนยันแล้ว ' + r.confirmedNights + '</span></div>' +
-        (other ? '<div class="pc-alt">จ่ายตามมติหอ (' + modeName(p.mode) + '): <b>' + money(r.pay) + '</b> บาท</div>' : '') +
+      const ns = nightsOf(r.name), alt = p.mode === 'equal' && r.pay !== null && Math.abs(r.pay - r.byRate) > 0.004, c = fr[r.name];
+      const blocks = ns.map((d) => '<i class="blk' + ((state.confirmed || {})[d] ? ' done' : d <= upto ? ' wait' : '') + (S.isHolidayNight(state, d) ? ' hol' : '') + '" title="' + be(d) + '"></i>').join('');
+      const waiting = ns.filter((d) => d <= upto && !(state.confirmed || {})[d]).length;
+      return '<div class="pcard" style="--tc:' + color(r.name) + '"><div class="pc-head"><span class="chip chip-lg" style="' + chipStyle(r.name) + '">ครู' + esc(r.name) + '</span>' + gtag(r.gender) +
+        '<span class="pc-money"><small>ยืนยันแล้ว</small> <b>' + money(r.confirmedPay) + '</b> <small>บาท</small></span></div>' +
+        '<div class="pc-bar" role="img" aria-label="เวร ' + r.count + ' คืน ยืนยันแล้ว ' + r.confirmedNights + '"><span class="pc-blocks" style="width:' + (r.count / maxN * 100) + '%">' + blocks + '</span></div>' +
+        '<div class="pc-meta"><span><b>' + r.confirmedNights + '</b> / ' + r.count + ' คืน <span class="muted">ยืนยันแล้ว</span></span><span class="pc-total">ทั้งเดือนประมาณ <b>' + money(r.byRate) + '</b></span></div>' +
+        '<div class="pc-tags"><span>ธรรมดา ' + r.weekdayNights + '</span><span>หยุด ' + r.holidayNights + '</span>' + (r.singles ? '<span>เดี่ยว ' + r.singles + '</span>' : '') + (waiting ? '<span class="warn">รอยืนยัน ' + waiting + '</span>' : '') +
+        (c && f.term ? '<span class="cum">สะสมเทอม ' + c.cum + ' (หยุด ' + c.cumHol + ')</span>' : '') + (c && c.travel ? '<span class="warn">จัดคืนพัก ' + c.travel + '</span>' : '') + '</div>' +
+        (alt ? '<div class="pc-alt">จ่ายตามมติหอ (' + modeName(p.mode) + '): <b>' + money(r.pay) + '</b> บาท</div>' : '') +
         '<div class="pc-dates muted">' + (dutyDates(r.name).join(', ') || '–') + '</div></div>';
-    }).join('') + '</div><p class="muted noprint pc-legend"><i class="seg-w"></i> คืนธรรมดา <i class="seg-h"></i> คืนวันหยุด · ความยาวขีดเทียบกับครูที่ขึ้นเวรมากสุดในเดือน · "ประมาณ" = ตามอัตราระเบียบการเงิน (' + p.rates.weekday + ' / ' + p.rates.holiday + ' บาท/คืน) ยอดจริงขึ้นกับการเงินโอนมา</p>' : '';
+    }).join('') + '</div><p class="muted noprint pc-legend"><i class="blk done"></i> ยืนยันแล้ว <i class="blk wait"></i> ผ่านแล้วรอยืนยัน <i class="blk"></i> ยังไม่ถึง <i class="blk hol"></i> ขีดส้ม = คืนวันหยุด · ยอด "ยืนยันแล้ว" นับตามชื่อที่อยู่ในตารางตอนนี้ (สลับเวร/จ้างแทนแล้วแก้ชื่อ ยอดตามคนที่อยู่เวรจริง ไม่ผูกกับตารางที่ระบบสร้าง) เฉพาะคืนที่กดยืนยัน ตามอัตราระเบียบ ' + p.rates.weekday + ' / ' + p.rates.holiday + ' บาท/คืน · "ทั้งเดือนประมาณ" ยอดจริงขึ้นกับการเงินโอนมา' +
+      (f.term ? ' · สะสมเทอม ' + esc(f.term) + ' ตั้งแต่ ' + be(f.from) + ' · ส่วนต่างสูงสุดในชุดเดียวกัน: ' + S.GENDER_LABEL.M + ' ' + f.spread.M.cum + ' · ' + S.GENDER_LABEL.F + ' ' + f.spread.F.cum : '') + '</p>' : '';
     return '<div class="card"><h2>ค่าตอบแทนเดือน' + ymLabel(view.ym) + '</h2>' +
       '<h3 class="sub">ตามระเบียบการเงิน (คำนวณล่วงหน้า)</h3>' +
       '<div class="kpis"><div><span>ทั้งเดือนตามตาราง</span><b class="big">' + money(p.expected) + '</b></div>' +
@@ -1769,7 +1789,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
       '<tfoot><tr><td>รวม</td><td class="num">' + sum('count') + (sum('holidayNights') ? ' <span class="muted">(หยุด ' + sum('holidayNights') + ')</span>' : '') + '</td>' + (anySingle ? '<td></td>' : '') + '<td class="num">' + sum('confirmedNights') + '</td><td></td><td class="num">' + money(p.confirmedTotal) + '</td><td class="num">' + money(p.total) + '</td></tr></tfoot></table></div>' +
       '<p class="muted">' + payNote(p) + ' · นับเวรตามวันที่เริ่มเวร 18:00 · นับตามครูที่ขึ้นเวรจริงในตารางปัจจุบัน</p>' +
       '<div class="row noprint"><button class="btn" data-action="export-pay">ส่งออก CSV</button><button class="btn" data-action="print">พิมพ์ / PDF</button></div></div>' +
-      fairnessCard() + monthCard() + receiptCard(p) + receiptDoc(p);
+      '<div class="only-print">' + fairnessCard() + '</div>' + monthCard() + receiptCard(p) + receiptDoc(p);
   }
   // ปิดเดือน: เลือกวิธีจ่ายของเดือนนี้ (เห็นยอดทั้งสองแบบ) แล้วจดวิธีและอัตราไว้กับเดือน
   function openClose() {
