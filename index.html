@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.10.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.11.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -126,6 +126,9 @@ details.card.legacy:not([open]) > summary h2 { color: var(--muted); }
 .paymode .col, form .col { display: flex; flex-direction: column; gap: 6px; }
 .card h3.sub { font-size: 0.95rem; margin: 4px 0 8px; color: var(--ink-2, inherit); }
 .cell .cf { color: #2F8A62; font-weight: 700; margin-left: 2px; }
+.cfb { align-self: flex-end; margin-top: auto; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #9DB5AA; color: #6B8278; background: #fff; font-size: .9rem; font-weight: 700; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.cfb.on { background: #2F8A62; border-color: #2F8A62; color: #fff; }
+.cfb:active { transform: scale(.92); }
 .paymode label.chk { min-height: 32px; }
 .hol-table td:first-child, .hol-table td:last-child { white-space: nowrap; }
 .hol-table tr.off td { opacity: .55; text-decoration: line-through; }
@@ -465,7 +468,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.10.0';
+  const VERSION = '1.11.0';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -1182,7 +1185,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
   <ol>
     <li>มีการเปลี่ยนเวร/จ้างแทน → แตะคืนนั้นแล้วแก้ชื่อเป็น<b>ครูที่อยู่เวรจริง</b> ใส่เหตุผล (ไม่บังคับ) · ระบบบันทึกรายการเปลี่ยนให้อัตโนมัติ</li>
     <li>นักเรียนไม่ถึงเกณฑ์ ครูอยู่คนเดียว → ติ๊ก <b>เวรเดี่ยว</b> (ได้ค่าตอบแทน 2 ส่วน)</li>
-    <li>ผ่านวันเวรไปแล้ว → แท็บ <b>สรุป</b> → <b>✔ ยืนยันทุกคืนที่ผ่านมาแล้ว</b> (แก้ชื่อให้ตรงก่อนกด) ระบบรวมยอดสะสมให้ · คืนที่ยืนยันแล้วล็อกชื่อ ถ้าต้องแก้ให้แตะคืนนั้น → ยกเลิกการยืนยัน</li>
+    <li>ผ่านวันเวรไปแล้ว → แตะ <b>○</b> มุมล่างขวาของช่องวันในตารางเพื่อยืนยันทีละคืน (กลายเป็น <b>✔</b> แตะอีกครั้งเพื่อยกเลิก) หรือแท็บ <b>สรุป</b> → <b>✔ ยืนยันทุกคืนที่ผ่านมาแล้ว</b> (แก้ชื่อให้ตรงก่อนกด) ระบบรวมยอดสะสมให้ · คืนที่ยืนยันแล้วล็อกชื่อ ถ้าต้องแก้ให้แตะคืนนั้น → ยกเลิกการยืนยัน</li>
     <li>แก้อะไรแล้ว <b>กดบันทึกทุกครั้ง</b></li>
   </ol>
 
@@ -1395,7 +1398,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.10.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.11.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -1659,9 +1662,12 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
     const SHORT_DOW = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
     let cells = S.THAI_DOW.map((n, i) => '<div class="dow' + (i === 0 || i === 6 ? ' we' : '') + '"><span class="full">' + n + '</span><span class="short">' + SHORT_DOW[i] + '</span></div>').join('');
     for (let i = 0; i < S.dow(start); i++) cells += '<div class="cell blank"></div>';
+    // ปุ่มยืนยันอยู่เวรจริงในช่องวัน (เฉพาะคืนที่เวรจบแล้ว): ○ = ยังไม่ยืนยัน แตะยืนยันได้เลย · ✔ = ยืนยันแล้ว แตะอีกครั้งเพื่อยกเลิก
+    const upto = confirmUpto();
+    const cfBtn = (d, ns) => (!ns.length || d > upto ? '' : '<span class="cfb noprint' + (state.confirmed[d] ? ' on' : '') + '" role="button" tabindex="0" data-action="confirm-night" data-date="' + d + '" aria-label="' + (state.confirmed[d] ? 'ยืนยันอยู่เวรจริงแล้ว แตะเพื่อยกเลิก' : 'แตะเพื่อยืนยันว่าอยู่เวรจริง') + '">' + (state.confirmed[d] ? '✔' : '○') + '</span>');
     nights.forEach((d) => {
       const w = S.dow(d), cls = w === 6 ? ' sat' : w === 0 ? ' sun' : '';
-      const head = '<span class="dn"><span class="num">' + Number(d.slice(8)) + '<span class="wk">' + S.THAI_DOW[w] + '</span></span><span class="meta"><span class="dg"><i>กลุ่ม </i>' + dgText(d) + '</span>' + (state.locked[d] ? ' 🔒' : '') + (state.confirmed[d] ? '<span class="cf noprint" title="confirmed">✔</span>' : '') + '</span></span>';
+      const head = '<span class="dn"><span class="num">' + Number(d.slice(8)) + '<span class="wk">' + S.THAI_DOW[w] + '</span></span><span class="meta"><span class="dg"><i>กลุ่ม </i>' + dgText(d) + '</span>' + (state.locked[d] ? ' 🔒' : '') + '</span></span>';
       if (!S.isDutyNight(state, d)) { cells += '<div class="cell off' + cls + '">' + head + '<span class="body"><span class="muted">ไม่มีเวร</span></span></div>'; return; }
       const ns = state.schedule[d] || [];
       const g = ns.length ? (S.nightGender(state, d) || genders[d]) : genders[d];
@@ -1671,7 +1677,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
       const hn = S.holidayName(state, d);
       const tags = gtag(g) + (hn ? '<span class="tagx hol" title="' + esc(hn) + '">หยุด</span>' : '') + (S.isSingle(state, d) ? '<span class="tagx">เดี่ยว</span>' : '') + (changed ? '<span class="tagx chg noprint" title="เปลี่ยนหลังประกาศ">แก้</span>' : '');
       const tip = [hn].concat(b ? b.msgs : []).filter(Boolean);
-      cells += '<button class="cell' + cls + (hn ? ' hol' : '') + flag + '" data-action="edit" data-date="' + d + '"' + (tip.length ? ' title="' + esc(tip.join('\n')) + '"' : '') + '>' + head + '<span class="body"><span class="tagrow">' + tags + '</span>' + inner + '</span></button>';
+      cells += '<button class="cell' + cls + (hn ? ' hol' : '') + flag + '" data-action="edit" data-date="' + d + '"' + (tip.length ? ' title="' + esc(tip.join('\n')) + '"' : '') + '>' + head + '<span class="body"><span class="tagrow">' + tags + '</span>' + inner + cfBtn(d, ns) + '</span></button>';
     });
 
     const riskHtml = risk.length ? '<div class="card noprint" id="risk"><h2>ช่วงเสี่ยง (ครูไม่ว่างทำให้ชุดเหลือน้อย)</h2><ul class="issues">' +
@@ -2535,6 +2541,16 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
         const at = new Date().toISOString(); list.forEach((d) => { state.confirmed[d] = at; });
         commit(); toast('ยืนยันแล้ว ' + list.length + ' คืน อย่าลืมกด "บันทึก"'); break;
       }
+      case 'confirm-night': {
+        const d = el.dataset.date;
+        if (isClosed(d)) { toast('เดือนนี้ปิดแล้ว'); break; }
+        if (state.confirmed[d]) {
+          if (!confirm('ยกเลิกการยืนยันอยู่เวรจริง คืนวันที่ ' + be(d) + ' หรือไม่?\n(ชื่อครูในคืนนั้นจะแก้ได้อีก และยอดเงินของคืนนี้จะไม่นับเป็น "ยืนยันแล้ว")')) break;
+          delete state.confirmed[d]; commit(); toast('ยกเลิกการยืนยันแล้ว อย่าลืมกด "บันทึก"'); break;
+        }
+        if (!(state.schedule[d] || []).length) break;
+        state.confirmed[d] = new Date().toISOString(); commit(); toast('ยืนยันคืน ' + be(d) + ' แล้ว อย่าลืมกด "บันทึก"'); break;
+      }
       case 'unconfirm': {
         const d = el.dataset.date;
         if (isClosed(d)) { toast('เดือนนี้ปิดแล้ว'); break; }
@@ -2658,7 +2674,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
   });
 
   document.addEventListener('keydown', (ev) => {
-    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('li[data-action]')) { ev.preventDefault(); ev.target.click(); }
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('li[data-action], .cfb[data-action]')) { ev.preventDefault(); ev.target.click(); }
   });
 
   document.addEventListener('change', (ev) => {
