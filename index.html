@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.11.0) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
+<!-- ไฟล์นี้สร้างอัตโนมัติจาก index.html + app.css + core.js + app.js ด้วย scripts/build.js (เวอร์ชัน 1.11.1) อย่าแก้ตรงนี้ แก้ที่ต้นทางแล้วรัน npm run build -->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -468,7 +468,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
   'use strict';
 
   // เลขเวอร์ชันของแอป (ต้องตรงกับ package.json, APP_VERSION ใน app.js และคู่มือ มีเทสต์ตรวจ)
-  const VERSION = '1.11.0';
+  const VERSION = '1.11.1';
   const SCHEMA = 4;
   const DAY_MS = 86400000;
   const THAI_DOW = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -1398,7 +1398,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
 (function () {
   'use strict';
   const S = window.SOD;
-  const APP_VERSION = '1.11.0'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
+  const APP_VERSION = '1.11.1'; // ต้องตรงกับ SOD.VERSION ใน core.js (ถ้าไม่ตรง แปลว่าอัปโหลดไฟล์ไม่ครบ)
   const KEY_SAVED = 'sod-v2-saved', KEY_DRAFT = 'sod-v2-draft'; // 'v2' = รูปแบบที่เก็บใน localStorage ไม่ใช่เวอร์ชันข้อมูล
 
   // ---------- สถานะ: แก้ไขได้ทันที แต่ต้องกด "บันทึก" จึงเป็นฉบับที่บันทึก ----------
@@ -2302,7 +2302,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
       '<label class="f">ข้อความแนบกับรูป (บรรทัดแรก "ตารางเวรหอนอนเดือน' + ymLabel(view.ym) + ' ครับ" ใส่ให้อัตโนมัติ · แก้ได้ จำไว้ในเครื่องนี้)<textarea id="shareNote" rows="5">' + esc(meta.shareNote ?? DEFAULT_NOTE) + '</textarea></label>' +
       '<div class="row" style="margin:4px 0 10px"><button type="button" class="btn sm" data-action="note-reset">ใช้ข้อความตั้งต้น</button><button type="button" class="btn sm" data-action="note-clear">ไม่แนบข้อความ</button></div>' +
       '<div class="stack"><button type="button" class="btn primary" data-action="share-img">แชร์รูป + ข้อความ (แล้วเลือก LINE)</button><button type="button" class="btn" data-action="save-img">บันทึกรูปลงเครื่อง</button>' +
-      '<button type="button" class="btn" data-action="share-text">แชร์ข้อความ</button><button type="button" class="btn" data-action="copy-text">คัดลอกข้อความ</button></div>' +
+      '<button type="button" class="btn" data-action="share-text">แชร์ข้อความ</button><button type="button" class="btn" data-action="copy-text">คัดลอกข้อความ</button></div><p class="muted" style="margin:6px 0 0;font-size:.82rem">' + SAVE_HINT + '</p>' +
       '<details class="share-text"><summary>ดูข้อความที่จะส่ง</summary><pre>' + esc(shareCache.text) + '</pre></details>' +
       '<div class="actions"><button type="button" class="btn" data-action="dlg-cancel">ปิด</button></div></form>';
     if (!dlg().open) dlg().showModal();
@@ -2375,11 +2375,19 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
     dlg().innerHTML = '<form method="dialog" data-form="printimg"><h3>' + (kind === 'receipt' ? 'พิมพ์ใบลงชื่อรับเงิน' : 'พิมพ์ตารางเวร') + ' · ' + ymLabel(view.ym) + '</h3>' +
       '<p class="muted">แอปที่เปิดจากไอคอนหน้าจอโฮมของ iPhone สั่งพิมพ์ตรงไม่ได้ ระบบจึงทำเป็นภาพให้ · แตะ <b>แชร์เพื่อพิมพ์</b> แล้วเลือก <b>"พิมพ์"</b> (หรือ "บันทึกลงไฟล์" เพื่อเก็บไว้)</p>' +
       '<img class="share-prev" src="' + shareCache.url + '" alt="ภาพสำหรับพิมพ์">' +
-      '<div class="stack"><button type="button" class="btn primary" data-action="share-print">แชร์เพื่อพิมพ์</button><button type="button" class="btn" data-action="save-img">บันทึกรูปลงเครื่อง</button></div>' +
+      '<div class="stack"><button type="button" class="btn primary" data-action="share-print">แชร์เพื่อพิมพ์</button><button type="button" class="btn" data-action="save-img">บันทึกรูปลงเครื่อง</button></div><p class="muted" style="margin:6px 0 0;font-size:.82rem">' + SAVE_HINT + '</p>' +
       '<div class="actions"><button type="button" class="btn" data-action="dlg-cancel">ปิด</button></div></form>';
     if (!dlg().open) dlg().showModal();
   }
-  function saveImage() { const a = document.createElement('a'); a.href = shareCache.url; a.download = shareCache.name; document.body.appendChild(a); a.click(); a.remove(); }
+  // บันทึกรูป: iPhone (โดยเฉพาะแอปจากไอคอนหน้าจอโฮม) สั่งดาวน์โหลดไฟล์ไม่ได้ จึงเปิดหน้าต่างแชร์ให้เลือก "บันทึกรูปภาพ" แทน
+  // (ต้องเรียกตอนแตะปุ่มทันที ไฟล์เตรียมไว้ใน shareCache.file แล้ว) ถ้าแชร์ไม่ได้ค่อยสั่งดาวน์โหลดแบบเดิม (Mac/คอมพิวเตอร์)
+  const SAVE_HINT = 'iPhone: ถ้าไม่บันทึก กดค้างที่รูปด้านบน แล้วเลือก "บันทึกรูปภาพ" (หรือ "เพิ่มไปยังรูปภาพ")';
+  function saveImage() {
+    const f = shareCache.file;
+    if (f && navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f] }).catch(() => {}); toast('เลือก "บันทึกรูปภาพ" ในหน้าต่างที่เด้งขึ้นมา'); return; }
+    const a = document.createElement('a'); a.href = shareCache.url; a.download = shareCache.name; document.body.appendChild(a); a.click(); a.remove();
+    if (isStandalone() || /iPhone|iPad|iPod/.test(navigator.userAgent)) toast('ถ้าไม่ได้บันทึก กดค้างที่รูปในหน้าต่าง แล้วเลือก "บันทึกรูปภาพ"');
+  }
   function copyText() {
     const done = () => toast('คัดลอกแล้ว ไปวางในกลุ่ม LINE ได้เลย');
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(shareCache.text).then(done).catch(() => toast('คัดลอกไม่ได้ เปิด "ดูข้อความที่จะส่ง" แล้วกดค้างเพื่อคัดลอก'));
@@ -2443,7 +2451,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
         const data = { files: shareCache.file ? [shareCache.file] : [], text };
         if (shareCache.file && navigator.canShare && navigator.canShare(data)) navigator.share(data).catch(() => {});
         else if (shareCache.file && navigator.canShare && navigator.canShare({ files: data.files })) navigator.share({ files: data.files }).catch(() => {});
-        else { saveImage(); toast('เครื่องนี้แชร์รูปตรงไม่ได้ บันทึกรูปแล้ว และคัดลอกข้อความไว้ให้ ส่งใน LINE ได้เลย'); }
+        else { saveImage(); toast('เครื่องนี้แชร์รูปตรงไม่ได้ ลองบันทึกรูปแล้ว (หรือกดค้างที่รูป) ข้อความคัดลอกไว้ให้ ส่งใน LINE ได้เลย'); }
         break;
       }
       case 'note-reset': $('#shareNote').value = DEFAULT_NOTE; meta.shareNote = DEFAULT_NOTE; saveMeta(); break;
@@ -2560,7 +2568,7 @@ button.btn.st-purple { background: #EAE3FA; color: #4B35A0; border-color: #C9BBF
       case 'print-receipt': if (isStandalone()) { openPrintImage('receipt'); break; } render(); document.body.classList.remove('print-guide'); document.body.classList.add('print-receipt'); window.print(); break;
       case 'share-print':
         if (shareCache.file && navigator.canShare && navigator.canShare({ files: [shareCache.file] })) navigator.share({ files: [shareCache.file] }).catch(() => {});
-        else { saveImage(); toast('บันทึกรูปแล้ว เปิดในแอปรูปภาพแล้วกดแชร์ → พิมพ์'); }
+        else { saveImage(); toast('ลองบันทึกรูปแล้ว (หรือกดค้างที่รูป) เปิดในแอปรูปภาพแล้วกดแชร์ → พิมพ์'); }
         break;
       case 'add-staff': {
         const nm = $('#nsName').value.trim(), g = $('#nsGender').value, grp = Number($('#nsGroup').value);
